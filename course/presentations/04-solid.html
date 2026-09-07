@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>04. SOLID — OOP on top of C#</title>
+  <link rel="stylesheet" href="shared/deck.css">
+</head>
+<body>
+  <div class="progress"></div>
+  <div class="deck">
+    <section class="slide title"><p class="kicker">Лекція 04</p><h1>Принципи SOLID</h1><p class="lead">П’ять правил, які роблять ієрархії класів придатними до змін.</p><div class="pills"><span class="pill">SRP</span><span class="pill">OCP</span><span class="pill">LSP</span><span class="pill">ISP</span><span class="pill">DIP</span></div></section>
+    <section class="slide "><h2>Перші три принципи</h2><div class="cols-3"><article class="card"><h3>SRP</h3><p class="small">Одна причина змінювати клас. Email і валідація адреси — різні типи.</p></article><article class="card"><h3>OCP</h3><p class="small">Відкритий до розширення, закритий до модифікації. Нова знижка — новий клас, не новий case.</p></article><article class="card"><h3>LSP</h3><p class="small">Нащадок можна підставити замість батька без поломки програми.</p></article></div></section>
+    <section class="slide "><h2>ISP і DIP</h2><div class="grid"><div><article class="card"><h3>ISP</h3><p>Не змушуйте клієнта залежати від методів, яких він не використовує. Дрібні інтерфейси.</p></article></div><div><article class="card"><h3>DIP</h3><p>Модулі верхнього рівня залежать від абстракцій, не від деталей. Деталі залежать від абстракцій.</p></article></div></div></section>
+    <section class="slide "><h2>OCP: погано — switch по типу</h2><pre><code>public double CalculateDiscount(double price, CustomerType t) {
+  switch (t) {
+    case CustomerType.Regular: return price * 0.1;
+    case CustomerType.Premium: return price * 0.3;
+    case CustomerType.Newbie:  return price * 0.05;
+    default: throw new ArgumentOutOfRangeException();
+  }
+} // кожен новий тип = правка цього методу</code></pre></section>
+    <section class="slide "><h2>OCP: добре — стратегія</h2><pre><code>public interface IDiscountStrategy {
+  double CalculateDiscount(double price);
+}
+public class DiscountCalculator {
+  private readonly IDiscountStrategy _s;
+  public DiscountCalculator(IDiscountStrategy s) =&gt; _s = s;
+  public double CalculateDiscount(double price) =&gt; _s.CalculateDiscount(price);
+}</code></pre></section>
+    <section class="slide "><h2>LSP: Orange не є Apple</h2><div class="grid"><div><p class="bad">Порушення: Orange : Apple і GetColor() бреше про яблуко.</p><pre><code>Apple apple = new Orange();
+Console.WriteLine(apple.GetColor());</code></pre></div><div><p class="good">Виправлення: спільний контракт IFruit.</p><pre><code>IFruit fruit = new Orange();
+fruit = new Apple();</code></pre></div></div></section>
+    <section class="slide "><h2>ISP: робот не їсть</h2><div class="grid"><div><pre><code>interface IWorker {
+  void Work();
+  void Eat();
+  void Sleep();
+}</code></pre></div><div><pre><code>interface IWorkable { void Work(); }
+interface IEatable { void Eat(); }
+class RobotWorker : IWorkable { }</code></pre></div></div></section>
+    <section class="slide "><h2>DIP: не new всередині бізнес-класу</h2><pre><code>public class EmployeeDetailsModified {
+  private readonly ISalaryCalculator salaryCalculator;
+  public EmployeeDetailsModified(ISalaryCalculator salaryCalculator)
+    =&gt; this.salaryCalculator = salaryCalculator;
+}</code></pre></section>
+    <section class="slide "><h2>Варто розібрати</h2><ul><li>S — відправка email + валідатор адреси/теми</li><li>O — калькулятор площі / знижок</li><li>L — запис у файл різних форматів</li><li>I — базовий механізм і уточнені інтерфейси</li><li>D — логер Trace / Log / Information / Exception</li></ul></section>
+    <section class="slide next-step"><p class="kicker">Після лекції</p><h2>Що далі</h2>
+      <p class="lead">Виконайте лабораторну з бібліотеки: користувачі, книги, підписка на категорію — спроєктуйте типи за SOLID.</p>
+      <p class="note">IoC-контейнер підключіть після лекції про DI.</p></section>
+  </div>
+  <div class="chrome">
+    <span>OOP on top of C# · <b>SOLID</b></span>
+    <span style="pointer-events:auto"><a href="index.html">усі лекції</a> · <span data-counter></span> · ← → · O огляд · F повний екран</span>
+  </div>
+  <script src="shared/deck.js"></script>
+</body>
+</html>

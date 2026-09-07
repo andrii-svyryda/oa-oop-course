@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>09. Вбудовані шаблони C# — OOP on top of C#</title>
+  <link rel="stylesheet" href="shared/deck.css">
+</head>
+<body>
+  <div class="progress"></div>
+  <div class="deck">
+    <section class="slide title"><p class="kicker">Лекція 09</p><h1>Вбудовані шаблони C#</h1><p class="lead">GoF уже «зашитий» у BCL — не винаходьте велосипед, розпізнайте його.</p><div class="pills"><span class="pill">Lazy&lt;T&gt;</span><span class="pill">event</span><span class="pill">IEnumerable</span><span class="pill">ICloneable</span></div></section>
+    <section class="slide "><h2>Що вже є в BCL</h2><div class="cols-3"><article class="card"><h3>Singleton</h3><p class="small"><code>Lazy&lt;T&gt;</code> — thread-safe відкладене створення.</p></article><article class="card"><h3>Observer</h3><p class="small"><code>event</code> і <code>IObservable&lt;T&gt;</code>.</p></article><article class="card"><h3>Builder</h3><p class="small"><code>StringBuilder</code>, fluent HTTP / Polly.</p></article></div></section>
+    <section class="slide "><h2>Ще три впізнавані шаблони</h2><div class="cols-3"><article class="card"><h3>Prototype</h3><p class="small"><code>ICloneable</code> + <code>MemberwiseClone</code> (shallow!).</p></article><article class="card"><h3>Iterator</h3><p class="small"><code>IEnumerable</code> / <code>foreach</code> / <code>yield</code>.</p></article><article class="card"><h3>Factory</h3><p class="small"><code>Activator.CreateInstance</code> за іменем типу.</p></article></div></section>
+    <section class="slide "><h2>Lazy&lt;T&gt; як одинак</h2><pre><code>public sealed class AppConfig {
+  private static readonly Lazy&lt;AppConfig&gt; _lazy =
+    new(() =&gt; new AppConfig());
+  public static AppConfig Instance =&gt; _lazy.Value;
+  private AppConfig() { /* load once */ }
+}</code></pre></section>
+    <section class="slide "><h2>Прототип і копіювання</h2><div class="grid"><div><img class="fig" src="../lectures/assets/09-builtin-csharp-patterns/Untitled 1.png" alt="prototype"></div><div><pre><code>class Car : ICloneable {
+  private int width;
+  public object Clone() =&gt; new Car(this.width);
+}
+Car two = (Car)carOne.Clone();
+// MemberwiseClone копіює посилання, не графи</code></pre></div></div></section>
+    <section class="slide "><h2>IObservable — спостерігач у бібліотеці</h2><pre><code>var range = Observable.Range(10, 15);
+range.Subscribe(Console.WriteLine, () =&gt; Console.WriteLine(&quot;Completed&quot;));
+
+var fromEnum = new List&lt;string&gt; { &quot;a&quot;, &quot;b&quot;, &quot;c&quot; }.ToObservable();
+fromEnum.Subscribe(Console.WriteLine);</code></pre></section>
+    <section class="slide "><h2>Питання для самоперевірки</h2><ul><li>Стовпи ООП, virtual / override / overload, sealed, boxing</li><li>Generics constraints, covariance, reflection, IDisposable</li><li>SOLID на пальцях + навіщо IoC</li></ul></section>
+    <section class="slide next-step"><p class="kicker">Після лекції</p><h2>Що далі</h2>
+      <p class="lead">Підготуйтеся до технічного інтерв’ю: пройдіться за повним списком запитань з плану курсу.</p></section>
+  </div>
+  <div class="chrome">
+    <span>OOP on top of C# · <b>Вбудовані шаблони C#</b></span>
+    <span style="pointer-events:auto"><a href="index.html">усі лекції</a> · <span data-counter></span> · ← → · O огляд · F повний екран</span>
+  </div>
+  <script src="shared/deck.js"></script>
+</body>
+</html>

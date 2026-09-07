@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>07. GoF: структурні — OOP on top of C#</title>
+  <link rel="stylesheet" href="shared/deck.css">
+</head>
+<body>
+  <div class="progress"></div>
+  <div class="deck">
+    <section class="slide title"><p class="kicker">Лекція 07</p><h1>Структурні патерни GoF</h1><p class="lead">Обгортки, спрощені фасади й дерева однотипних вузлів.</p><div class="pills"><span class="pill">Decorator</span><span class="pill">Facade</span><span class="pill">Adapter</span><span class="pill">Composite</span></div></section>
+    <section class="slide "><h2>Декоратор</h2><div class="grid"><div><img class="fig" src="../lectures/assets/07-gof-structural/image.png" alt="decorator">
+        <p class="small">Той самий контракт, додаткова поведінка без зміни оригіналу.</p></div><div><ul>
+          <li>Retry, logging, кеш, шифрування потоку</li>
+          <li>Рекурсивний: декоратор на декоратор</li>
+          <li>Клієнт не знає, що викликає обгортку</li>
+        </ul></div></div></section>
+    <section class="slide "><h2>Ланцюжок відповідальності навколо IMessenger</h2><div class="grid"><div><img class="fig" src="../lectures/assets/07-gof-structural/image 1.png" alt="chain"></div><div><pre><code>public interface IMessenger {
+  void Send(Message message);
+  Message Receive();
+}
+// LoggingMessenger : IMessenger
+// RetryMessenger : IMessenger
+// обидва тримають inner IMessenger</code></pre></div></div></section>
+    <section class="slide "><h2>Фасад</h2><div class="grid"><div><ul>
+          <li>Простий інтерфейс до складної підсистеми</li>
+          <li>PlaceOrder: Product + Payment + Invoice в одному методі</li>
+          <li>Клієнт не збирає оркестрацію сам</li>
+        </ul></div><div><img class="fig" src="../lectures/assets/07-gof-structural/image 6.png" alt="facade"></div></div></section>
+    <section class="slide "><h2>Adapter і Composite</h2><div class="grid"><div><article class="card"><h3>Adapter</h3><p>Чужий інтерфейс → потрібний контракт. Старий логер під <code>ILogger</code>.</p></article></div><div><article class="card"><h3>Composite</h3><p>Листок і група з одним інтерфейсом. <code>IGraphic</code>: Circle і GroupOfGraphics.</p></article></div></div></section>
+    <section class="slide "><h2>Коли який</h2><ul><li>Треба додати поведінку навколо існуючого об’єкта → Decorator</li><li>Занадто багато класів, щоб зробити «одну дію» → Facade</li><li>Несумісні інтерфейси → Adapter</li><li>Дерево однотипних елементів → Composite</li></ul></section>
+  </div>
+  <div class="chrome">
+    <span>OOP on top of C# · <b>GoF: структурні</b></span>
+    <span style="pointer-events:auto"><a href="index.html">усі лекції</a> · <span data-counter></span> · ← → · O огляд · F повний екран</span>
+  </div>
+  <script src="shared/deck.js"></script>
+</body>
+</html>

@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lecture01-OopTheory", "lecture-01-oop-theory\Lecture01-OopTheory.csproj", "{BFE622C5-971D-4FA5-839E-F2C40D6E3AEC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lecture02-Generics", "lecture-02-generics\Lecture02-Generics.csproj", "{A3DDB093-E49D-4F71-A37C-86B106B0DD7A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BFE622C5-971D-4FA5-839E-F2C40D6E3AEC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BFE622C5-971D-4FA5-839E-F2C40D6E3AEC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BFE622C5-971D-4FA5-839E-F2C40D6E3AEC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BFE622C5-971D-4FA5-839E-F2C40D6E3AEC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A3DDB093-E49D-4F71-A37C-86B106B0DD7A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A3DDB093-E49D-4F71-A37C-86B106B0DD7A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A3DDB093-E49D-4F71-A37C-86B106B0DD7A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A3DDB093-E49D-4F71-A37C-86B106B0DD7A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

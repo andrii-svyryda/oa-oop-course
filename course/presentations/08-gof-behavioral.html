@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>08. GoF: поведінкові — OOP on top of C#</title>
+  <link rel="stylesheet" href="shared/deck.css">
+</head>
+<body>
+  <div class="progress"></div>
+  <div class="deck">
+    <section class="slide title"><p class="kicker">Лекція 08</p><h1>Поведінкові патерни GoF</h1><p class="lead">Хто кого повідомляє, хто виконує команду, хто обирає алгоритм.</p><div class="pills"><span class="pill">Observer</span><span class="pill">Command</span><span class="pill">Strategy</span><span class="pill">Mediator</span></div></section>
+    <section class="slide "><h2>Observer / оглядач</h2><div class="grid"><div><img class="fig" src="../lectures/assets/08-gof-behavioral/Untitled.png" alt="observer">
+        <p class="small">Один-до-багатьох: зміна суб’єкта → усі підписники Update.</p></div><div><pre><code>interface IObserver {
+  void Update(Product product);
+}
+interface ISubject {
+  void RegisterObserver(IObserver o);
+  void RemoveObserver(IObserver o);
+  void NotifyObservers(Product p);
+}</code></pre></div></div></section>
+    <section class="slide "><h2>Де живе в .NET</h2><ul><li><code>event</code> — класичний спостерігач мови</li><li><code>IObservable&lt;T&gt;</code> / Rx</li><li>Типовий чат: новий користувач → нотифікації (можна вимкнути)</li></ul></section>
+    <section class="slide "><h2>Команда</h2>
+      <p class="lead">Запит як об’єкт: можна ставити в чергу, скасовувати, логувати.</p>
+      <ul>
+        <li>Invoker знає лише <code>ICommand.Execute()</code></li>
+        <li>Конкретна команда тримає receiver і параметри</li>
+        <li>Близько до MediatR: IRequest / IRequestHandler</li>
+      </ul></section>
+    <section class="slide "><h2>Стратегія</h2><div class="grid"><div><p>Сімейство алгоритмів за спільним інтерфейсом. Об’єкт-контекст делегує роботу стратегії.</p><ul><li>Фільтри повідомлень у чаті</li><li>Напрямок сортування через делегат — спрощена стратегія</li><li>Знижки з лекції SOLID — теж стратегія</li></ul></div><div><img class="fig" src="../lectures/assets/08-gof-behavioral/Untitled 4.png" alt="strategy"></div></div></section>
+    <section class="slide "><h2>Mediator</h2>
+      <p class="lead">Об’єкти не знають одне про одного — говорять через посередника.</p>
+      <ul>
+        <li>+</li><li>менше зв’язності, централізована логіка взаємодії</li>
+        <li>−</li><li>ризик «бог-об’єкта», зайва непрямість</li>
+      </ul></section>
+    <section class="slide next-step"><p class="kicker">Після лекції</p><h2>Що далі</h2>
+      <p class="lead">Спрощений медіатор (як MediatR): handlers як transient, свої тести маршрутизації.</p></section>
+  </div>
+  <div class="chrome">
+    <span>OOP on top of C# · <b>GoF: поведінкові</b></span>
+    <span style="pointer-events:auto"><a href="index.html">усі лекції</a> · <span data-counter></span> · ← → · O огляд · F повний екран</span>
+  </div>
+  <script src="shared/deck.js"></script>
+</body>
+</html>

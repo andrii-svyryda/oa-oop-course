@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>01. Теорія ООП — OOP on top of C#</title>
+  <link rel="stylesheet" href="shared/deck.css">
+</head>
+<body>
+  <div class="progress"></div>
+  <div class="deck">
+    <section class="slide title"><p class="kicker">Лекція 01</p><h1>Теорія ООП</h1><p class="lead">Чотири стовпи, розширювальні методи, делегати і LINQ — основа решти курсу.</p><div class="pills"><span class="pill">абстракція</span><span class="pill">інкапсуляція</span><span class="pill">наслідування</span><span class="pill">поліморфізм</span></div></section>
+    <section class="slide "><h2>План заняття</h2><ul><li>Абстрактні класи та інтерфейси (у т.ч. default methods)</li><li>Інкапсуляція: поля, властивості, публічний контракт</li><li>Наслідування: <code>base</code>, <code>virtual</code>, <code>sealed</code></li><li>Поліморфізм: overload vs override</li><li>Extension methods, делегати, <code>yield</code>, LINQ</li></ul></section>
+    <section class="slide "><h2>Абстракція</h2>
+      <p class="lead">Приховуємо деталі імплементації й лишаємо лише головні характеристики об’єкта.</p>
+      <ul>
+        <li>Мета — спростити розуміння, не «показати все»</li>
+        <li>У C# абстракції будують <strong>абстрактні класи</strong> та <strong>інтерфейси</strong></li>
+      </ul></section>
+    <section class="slide "><h2>Абстрактний клас</h2><div class="grid"><div><ul>
+          <li>Не можна створити екземпляр</li>
+          <li>Може мати абстрактні методи й властивості</li>
+          <li>Нащадок мусить реалізувати всі абстрактні члени</li>
+          <li><span class="note">Немає <code>abstract static</code> — static належить типу, не об’єкту</span></li>
+        </ul></div><div><pre><code>abstract class Shape {
+  public abstract int GetArea();
+}
+
+class Square : Shape {
+  private readonly int sideSize;
+  public Square(int size) =&gt; sideSize = size;
+  public override int GetArea() =&gt; sideSize * sideSize;
+}</code></pre></div></div></section>
+    <section class="slide "><h2>Інтерфейс — контракт</h2><div class="grid"><div><ul>
+          <li>Методи, властивості, індексатори, події</li>
+          <li>Клас / record / struct зобов’язані реалізувати контракт</li>
+          <li>Не інстанціюємо інтерфейс</li>
+          <li>Клієнт працює з абстракцією: масив <code>IShapeAreaCalculator[]</code></li>
+        </ul></div><div><pre><code>interface IShapeAreaCalculator {
+  double GetArea();
+  string WhoAmI { get; }
+}
+
+class Circle : IShapeAreaCalculator {
+  public double GetArea() =&gt; Math.PI * r * r;
+  public string WhoAmI =&gt; GetType().ToString();
+}</code></pre></div></div></section>
+    <section class="slide "><h2>Default interface methods</h2>
+      <p>Реалізація за замовчуванням у інтерфейсі: спільний алгоритм спирається на абстрактні кроки.</p>
+      <pre><code>interface ISecureCardReader {
+  void InitializeCardReader();
+  void CloseCardReader();
+  string NativeRead();
+
+  string SecureRead() {
+    InitializeCardReader();
+    var n = NativeRead();
+    CloseCardReader();
+    return Mask(n);
+  }
+}</code></pre></section>
+    <section class="slide "><h2>Інкапсуляція</h2><div class="grid"><div><ul>
+          <li>Внутрішній стан прихований</li>
+          <li>Доступ лише через публічний інтерфейс</li>
+          <li>Модифікатори: <code>public</code>, <code>private</code>, <code>protected</code>, <code>internal</code></li>
+          <li>Публічне <strong>поле</strong> ламає контроль; публічна <strong>властивість</strong> — ні</li>
+        </ul></div><div><pre><code>public class Account {
+  private decimal balance;
+  public decimal Balance =&gt; balance;
+
+  public void Withdraw(decimal amount) {
+    if (balance &lt; amount)
+      throw new Exception(&quot;Insufficient funds&quot;);
+    balance -= amount;
+  }
+}</code></pre></div></div></section>
+    <section class="slide "><h2>Наслідування</h2>
+      <ul>
+        <li>Похідний клас повторно використовує й розширює базовий</li>
+        <li>Доступні <code>public</code> / <code>protected</code> / <code>internal</code>; <code>private</code> — ні</li>
+        <li><code>virtual</code> + <code>override</code>; звертання до батька — <code>base</code></li>
+        <li><code>sealed</code> забороняє наслідування або подальше override</li>
+        <li class="bad">Немає множинного наслідування класів — лише багато інтерфейсів</li>
+      </ul></section>
+    <section class="slide "><h2>Приклад: Person → Student / Teacher</h2><pre><code>public class Student : Person {
+  public string StudentEmail { get; private set; }
+  public Student(string name, int age, string address, string email)
+      : base(name, age, address) {
+    StudentEmail = email;
+  }
+}</code></pre></section>
+    <section class="slide "><h2>Поліморфізм</h2><div class="grid"><div><p><strong>Статичний</strong> (компіляція)</p>
+        <ul><li>перевантаження методів</li><li>перевантаження операторів</li></ul>
+        <p><strong>Динамічний</strong> (runtime)</p>
+        <ul><li><code>virtual</code> / <code>override</code></li>
+        <li>виклик через базовий тип запускає метод нащадка</li></ul></div><div><pre><code>public int Add(int a, int b) =&gt; a + b;
+public double Add(double a, double b) =&gt; a + b;
+
+List&lt;Shape&gt; shapes = [new Rectangle(...), new Triangle(...)];
+foreach (var s in shapes) s.Draw(); // динамічний</code></pre></div></div></section>
+    <section class="slide "><h2>Розширювальні методи</h2><div class="grid"><div><ul><li>Статичний клас, перший параметр з <code>this</code></li><li>Виклик як у члена типу</li><li>Існуючий метод типу має пріоритет</li><li>Типовий приклад: розбити рядок на слова й порахувати їх</li></ul></div><div><pre><code>public static class StringExtension {
+  public static string[] ToWords(this string str)
+    =&gt; str.Split([&#x27; &#x27;, &#x27;.&#x27;, &#x27;?&#x27;],
+         StringSplitOptions.RemoveEmptyEntries);
+  public static int WordsCount(this string str)
+    =&gt; str.ToWords().Length;
+}</code></pre></div></div></section>
+    <section class="slide "><h2>LINQ стоїть на трьох ніжках</h2><div class="cols-3"><article class="card"><h3>Extension methods</h3><p class="small">Where, Select — методи розширення IEnumerable</p></article><article class="card"><h3>Делегати</h3><p class="small">Func, Action, Predicate — колбеки для фільтрів</p></article><article class="card"><h3>yield</h3><p class="small">Відкладене виконання: елемент з’являється лише коли його просять</p></article></div></section>
+    <section class="slide "><h2>Делегат як точка розширення</h2><pre><code>public delegate List&lt;string&gt; ParseCardNumber(string cardNumber);
+
+public string Mask(string cardNumber, ParseCardNumber parse = null) {
+  var groups = parse != null ? parse(cardNumber) : SplitBy4(cardNumber);
+  return $&quot;{groups[0]} **** **** {groups[^1]}&quot;;
+}
+// або Func&lt;string, List&lt;string&gt;&gt;</code></pre></section>
+    <section class="slide "><h2>Підсумок</h2>
+      <ul>
+        <li>Працюйте через <strong>контракти</strong>, не через конкретні класи</li>
+        <li>Стан ховайте; властивості дають місце для інваріантів</li>
+        <li>Поліморфізм = одна назва, різна поведінка</li>
+        <li>LINQ — не магія, а extensions + делегати + yield</li>
+      </ul></section>
+    <section class="slide next-step"><p class="kicker">Після лекції</p><h2>Що далі</h2>
+      <p class="lead">Лабораторні 1 і 2: абстрактні <code>BankAccount</code> і <code>Animal</code>.</p>
+      <p class="note">Почніть з цих двох робіт. Інші лабораторні будуть пізніше.</p></section>
+  </div>
+  <div class="chrome">
+    <span>OOP on top of C# · <b>Теорія ООП</b></span>
+    <span style="pointer-events:auto"><a href="index.html">усі лекції</a> · <span data-counter></span> · ← → · O огляд · F повний екран</span>
+  </div>
+  <script src="shared/deck.js"></script>
+</body>
+</html>

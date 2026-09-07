@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>06. GoF: породжувальні — OOP on top of C#</title>
+  <link rel="stylesheet" href="shared/deck.css">
+</head>
+<body>
+  <div class="progress"></div>
+  <div class="deck">
+    <section class="slide title"><p class="kicker">Лекція 06</p><h1>Породжувальні патерни GoF</h1><p class="lead">Гнучке створення об’єктів без розкиданих new і зайвих залежностей.</p><div class="pills"><span class="pill">Factory</span><span class="pill">Abstract Factory</span><span class="pill">Builder</span><span class="pill">Singleton</span></div></section>
+    <section class="slide "><h2>Патерн ≠ алгоритм</h2><ul><li>Алгоритм — чіткі кроки (рецепт)</li><li>Патерн — креслення рішення; код щоразу підлаштовують</li><li>GoF («банда чотирьох»): породжувальні, структурні, поведінкові</li></ul></section>
+    <section class="slide "><h2>Три сім’ї GoF</h2><div class="cols-3"><article class="card"><h3>Породжувальні</h3><p class="small">Як створювати об’єкти, не прив’язуючись до конкретних класів.</p></article><article class="card"><h3>Структурні</h3><p class="small">Як складати об’єкти в більші структури.</p></article><article class="card"><h3>Поведінкові</h3><p class="small">Як об’єкти спілкуються і розподіляють обов’язки.</p></article></div></section>
+    <section class="slide "><h2>Абстрактна фабрика</h2><div class="grid"><div><img class="fig" src="../lectures/assets/06-gof-creational/Untitled.png" alt="abstract factory">
+        <p class="small">Сім’ї сумісних продуктів без вказання конкретних класів.</p></div><div><pre><code>interface ICommunicationBaseFactory {
+  IBluetoothCommFactory InitializeBluetoothCommunication();
+  IWifiCommFactory InitializeWiFiCommnucation();
+}
+// клієнт знає лише абстракції,
+// конкретну фабрику йому передають</code></pre></div></div></section>
+    <section class="slide "><h2>Фабричний метод</h2>
+      <p class="lead">Виносимо <code>new</code> у перевизначуваний метод підкласу.</p>
+      <ul>
+        <li>Клієнт залежить від абстракції продукту</li>
+        <li>У .NET поруч: <code>DbProviderFactory</code>, <code>LoggerFactory</code>, <code>Activator.CreateInstance</code></li>
+        <li>Детальніше — лекція про вбудовані шаблони C#</li>
+      </ul></section>
+    <section class="slide "><h2>Одинак — і чому «проста» версія небезпечна</h2><div class="grid"><div><ul>
+          <li>Один екземпляр + глобальна точка доступу</li>
+          <li>Зазвичай lazy, без параметрів конструктора</li>
+          <li class="bad">Код справа — не thread-safe</li>
+          <li class="good">Краще <code>Lazy&lt;T&gt;</code> або контейнер Singleton</li>
+        </ul></div><div><pre><code>public sealed class Singleton {
+  private static Singleton instance;
+  private Singleton() {}
+  public static Singleton Instance {
+    get {
+      if (instance == null)
+        instance = new Singleton();
+      return instance;
+    }
+  }
+}</code></pre></div></div></section>
+    <section class="slide "><h2>Будівельник</h2><div class="grid"><div><img class="fig" src="../lectures/assets/06-gof-creational/Untitled 1.png" alt="builder">
+        <ul class="small">
+          <li>Director, Builder, ConcreteBuilder, Product</li>
+          <li>Той самий процес — різні представлення</li>
+          <li>Fluent API: кроки ланцюжком</li>
+        </ul></div><div><pre><code>HttpResponseMessage response = await HttpRetryBuilder
+  .Create()
+  .WithMaxRetries(3)
+  .WithRetryDelay(TimeSpan.FromSeconds(2))
+  .WithRequest(MakeHttpRequest)
+  .ExecuteAsync();</code></pre></div></div></section>
+    <section class="slide next-step"><p class="kicker">Після лекції</p><h2>Що далі</h2>
+      <p class="lead"><code>SqlBuilder</code>: fluent вибірка й сортування під PostgreSQL і MS SQL.</p>
+      <pre><code>SqlBuilder.Select&lt;User&gt;()
+  .OrderBy(_ =&gt; _.RegistrationDate)
+  .Take(10);
+// CommandText + CommandParameters</code></pre></section>
+  </div>
+  <div class="chrome">
+    <span>OOP on top of C# · <b>GoF: породжувальні</b></span>
+    <span style="pointer-events:auto"><a href="index.html">усі лекції</a> · <span data-counter></span> · ← → · O огляд · F повний екран</span>
+  </div>
+  <script src="shared/deck.js"></script>
+</body>
+</html>

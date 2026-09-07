@@ -1,0 +1,56 @@
+# --- Internal / not for students ---
+.cursor/
+docs/
+__pycache__/
+*.py[cod]
+*.pyo
+
+# --- .NET build output (code/) ---
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]uild/
+*.user
+*.userosscache
+*.suo
+*.cache
+*.dll
+*.exe
+*.pdb
+*.runtimeconfig.json
+*.deps.json
+project.lock.json
+project.fragment.lock.json
+artifacts/
+*.nupkg
+*.snupkg
+
+# --- IDE / OS ---
+.vs/
+.idea/
+*.swp
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- NuGet (local restore cache inside repo) ---
+*.nuget.props
+*.nuget.targets
+project.assets.json
+project.nuget.cache
+*.nuget.dgspec.json
+
+# --- Test / coverage ---
+TestResults/
+coverage/
+*.coverage
+*.coveragexml

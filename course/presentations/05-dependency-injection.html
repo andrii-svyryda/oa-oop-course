@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>05. Dependency Injection — OOP on top of C#</title>
+  <link rel="stylesheet" href="shared/deck.css">
+</head>
+<body>
+  <div class="progress"></div>
+  <div class="deck">
+    <section class="slide title"><p class="kicker">Лекція 05</p><h1>Впровадження залежностей</h1><p class="lead">Не створюй сервіс сам — отримай його ззовні.</p><div class="pills"><span class="pill">IoC</span><span class="pill">Transient</span><span class="pill">Scoped</span><span class="pill">Singleton</span></div></section>
+    <section class="slide "><h2>Щільне зв’язування</h2><div class="grid"><div><img class="fig" src="../lectures/assets/05-dependency-injection/Untitled.png" alt="coupling">
+        <p class="note">Зміна логера змушує чіпати MessageProcessor.</p></div><div><pre><code>public class MessageProcessorForTightCoupling {
+  private LogManager logManager;
+  public MessageProcessorForTightCoupling() {
+    this.logManager = new LogManager(); // сам створив
+  }
+}</code></pre></div></div></section>
+    <section class="slide "><h2>Слабке зв’язування і DI</h2><ul><li>Створення об’єктів відокремлене від їх використання</li><li>Клієнт не знає, <em>як</em> зібрати сервіс</li><li>Залежність <strong>передають</strong> (constructor / method / property injection)</li><li>DI ≠ DIP, але DI — типовий спосіб дотримати DIP</li></ul></section>
+    <section class="slide "><h2>Контейнер Microsoft.Extensions.DependencyInjection</h2><pre><code>using IHost host = Host.CreateDefaultBuilder()
+  .ConfigureServices((_, services) =&gt; {
+    services.AddSingleton&lt;IEmailNotification, EmailNotification&gt;();
+    services.AddSingleton&lt;NotificationService&gt;();
+  }).Build();
+
+var sender = host.Services.GetService&lt;NotificationService&gt;();
+sender.PushNotification(&quot;DI is not DIP&quot;);</code></pre></section>
+    <section class="slide "><h2>Service lifetimes</h2><div class="cols-3"><article class="card"><h3>Transient</h3><p class="small">Новий екземпляр на кожен запит із контейнера.</p></article><article class="card"><h3>Scoped</h3><p class="small">Один екземпляр на scope / HTTP-запит. Типово для web.</p></article><article class="card"><h3>Singleton</h3><p class="small">Один екземпляр на весь час життя застосунку.</p></article></div></section>
+    <section class="slide "><h2>Варто розібрати</h2><p class="lead"><code>Worker</code>, який обробляє дані залежно від типу роботи: конкретну стратегію роботи йому передають, він її не створює.</p></section>
+    <section class="slide "><h2>Правило на слайд</h2><p class="lead"><code>new</code> конкретних сервісів у бізнес-класі — запах. Композиція кореня (Program / Startup) — єдине місце, де збираємо граф.</p></section>
+    <section class="slide next-step"><p class="kicker">Після лекції</p><h2>Що далі</h2>
+      <p class="lead">У тій самій лабораторній з бібліотеки: зареєструйте сервіси в IoC-контейнері (lifetimes на місці).</p></section>
+  </div>
+  <div class="chrome">
+    <span>OOP on top of C# · <b>Dependency Injection</b></span>
+    <span style="pointer-events:auto"><a href="index.html">усі лекції</a> · <span data-counter></span> · ← → · O огляд · F повний екран</span>
+  </div>
+  <script src="shared/deck.js"></script>
+</body>
+</html>

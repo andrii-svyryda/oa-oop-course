@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>02. Узагальнення — OOP on top of C#</title>
+  <link rel="stylesheet" href="shared/deck.css">
+</head>
+<body>
+  <div class="progress"></div>
+  <div class="deck">
+    <section class="slide title"><p class="kicker">Лекція 02</p><h1>Узагальнення (generics)</h1><p class="lead">Один алгоритм — багато типів, без кастингу і дублювання коду.</p><div class="pills"><span class="pill">&lt;T&gt;</span><span class="pill">constraints</span><span class="pill">List / Dictionary</span></div></section>
+    <section class="slide "><h2>Навіщо generics</h2><ul><li><strong>Безпека типів</strong> на етапі компіляції</li><li><strong>Продуктивність</strong> — немає boxing / зайвого cast</li><li><strong>Повторне використання</strong> — один код для int, string, своїх класів</li></ul></section>
+    <section class="slide "><h2>Узагальнений метод Swap</h2><pre><code>public static void Swap&lt;T&gt;(ref T one, ref T second) {
+  T tmp = one;
+  one = second;
+  second = tmp;
+}
+
+Swap&lt;int&gt;(ref a, ref b);
+Swap(ref c, ref d); // компілятор виведе T</code></pre></section>
+    <section class="slide "><h2>Узагальнений клас</h2><pre><code>public class VerySimpleAndNaiveCache&lt;T&gt; {
+  private Dictionary&lt;string, T&gt; cache = new();
+
+  public T GetOrCreate(string key, Func&lt;T&gt; createItem) {
+    if (!cache.ContainsKey(key))
+      cache[key] = createItem();
+    return cache[key];
+  }
+}
+
+var usersCache = new VerySimpleAndNaiveCache&lt;UserCacheItem&gt;();</code></pre></section>
+    <section class="slide "><h2>Обмеження (constraints)</h2>
+      <ul>
+        <li><code>where T : struct</code> — value type</li>
+        <li><code>where T : class</code> — reference type</li>
+        <li><code>where T : new()</code> — є конструктор без параметрів</li>
+        <li><code>where T : Enum</code>, <code>notnull</code>, конкретний базовий клас / інтерфейс</li>
+      </ul>
+      <pre><code>public static void Swap&lt;T&gt;(ref T a, ref T b) where T : struct</code></pre></section>
+    <section class="slide "><h2>Колекції як головний приклад</h2><ul><li><code>List&lt;T&gt;</code> — індексований динамічний список</li><li><code>Dictionary&lt;TKey,TValue&gt;</code> — пари ключ–значення</li><li><code>Queue&lt;T&gt;</code> FIFO · <code>Stack&lt;T&gt;</code> LIFO</li><li>Делегати <code>Func&lt;&gt;</code> / <code>Action&lt;&gt;</code> теж generic</li></ul></section>
+    <section class="slide "><h2>Підсумок</h2><p class="lead">Якщо бачите copy-paste під int і double — майже завжди потрібен <code>T</code> з правильним constraint.</p></section>
+    <section class="slide next-step"><p class="kicker">Після лекції</p><h2>Що далі</h2>
+      <p class="lead">Лабораторна 7: власний generic linked list із підтримкою <code>foreach</code>.</p>
+      <p class="note">Пізніше в курсі — generic <code>Calculator</code> лише для числових типів і unit-тести.</p></section>
+  </div>
+  <div class="chrome">
+    <span>OOP on top of C# · <b>Узагальнення</b></span>
+    <span style="pointer-events:auto"><a href="index.html">усі лекції</a> · <span data-counter></span> · ← → · O огляд · F повний екран</span>
+  </div>
+  <script src="shared/deck.js"></script>
+</body>
+</html>

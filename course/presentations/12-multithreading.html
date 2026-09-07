@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>12. Багатопотоковість — OOP on top of C#</title>
+  <link rel="stylesheet" href="shared/deck.css">
+</head>
+<body>
+  <div class="progress"></div>
+  <div class="deck">
+    <section class="slide title"><p class="kicker">Лекція 12</p><h1>Багатопотоковість у C#</h1><p class="lead">Паралельність дає швидкість і гонки. Синхронізація — плата за спільний стан.</p><div class="pills"><span class="pill">Thread</span><span class="pill">ThreadPool</span><span class="pill">lock</span><span class="pill">async</span></div></section>
+    <section class="slide "><h2>Процес і потік</h2><div class="grid"><div><img class="fig" src="../lectures/assets/12-multithreading/Preemption.drawio.png" alt="preemption"></div><div><ul>
+          <li>Однопроцесорні ОС і витісняюча багатозадачність (Win95 як приклад)</li>
+          <li>Процес = адресний простір; потоків у ньому багато</li>
+          <li>У кожного процесу є головний потік</li>
+        </ul></div></div></section>
+    <section class="slide "><h2>Свій Thread</h2><pre><code>Thread t = new Thread(Worker);
+t.Start();                 // не блокує Main
+for (int i = 0; i &lt; 10; i++) {
+  Console.WriteLine(&quot;Main&quot;);
+  Thread.Sleep(100);
+}
+t.Join();                  // дочекатись Worker</code></pre></section>
+    <section class="slide "><h2>ThreadPool</h2>
+      <p>Пул повторно використовує потоки. Не створюйте Thread на кожне дрібне завдання.</p>
+      <pre><code>ThreadPool.QueueUserWorkItem(Worker, &quot;Hello, world!&quot;);</code></pre></section>
+    <section class="slide "><h2>Гонка без lock</h2><div class="grid"><div><pre><code>public void PrintTable() {
+  for (int i = 1; i &lt;= 10; i++) {
+    Thread.Sleep(100);
+    Console.WriteLine(i);
+  }
+}
+// два потоки друкують впереміш</code></pre></div><div><pre><code>public void PrintTable() {
+  lock (this) { /* критична секція */ }
+}
+// також: Mutex, Semaphore
+// lock(this) у бібліотеках — погана практика;
+// краще private readonly object _sync = new();</code></pre></div></div></section>
+    <section class="slide "><h2>Task і async/await</h2><div class="grid"><div><ul>
+          <li>Потік керує ОС; Task — середовище виконання</li>
+          <li>Винятки в Task структурованіші, ніж « dig в чужому потоці»</li>
+          <li>TAP: <code>async Task</code> + <code>await</code></li>
+        </ul></div><div><pre><code>static async Task Main() {
+  Task task1 = Task.Run(
+    () =&gt; Console.WriteLine(&quot;work&quot;));
+  await task1;
+  Console.WriteLine(&quot;Task completed!&quot;);
+}</code></pre></div></div></section>
+    <section class="slide "><h2>Зв’язок з іншими темами</h2><p class="lead">Thread-safety одинака (<code>Lazy&lt;T&gt;</code>) і спільний стан у чаті — типові місця, де ця лекція проявляється. Окремої лабораторної з потоків немає.</p></section>
+  </div>
+  <div class="chrome">
+    <span>OOP on top of C# · <b>Багатопотоковість</b></span>
+    <span style="pointer-events:auto"><a href="index.html">усі лекції</a> · <span data-counter></span> · ← → · O огляд · F повний екран</span>
+  </div>
+  <script src="shared/deck.js"></script>
+</body>
+</html>

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>11. Колекції — OOP on top of C#</title>
+  <link rel="stylesheet" href="shared/deck.css">
+</head>
+<body>
+  <div class="progress"></div>
+  <div class="deck">
+    <section class="slide title"><p class="kicker">Лекція 11</p><h1>Колекції в C#</h1><p class="lead">Яку структуру обрати — питання інваріантів доступу, а не «що перше згадали».</p><div class="pills"><span class="pill">List</span><span class="pill">Dictionary</span><span class="pill">HashSet</span><span class="pill">Stack / Queue</span></div></section>
+    <section class="slide "><h2>List&lt;T&gt;</h2><p class="lead">Типізований список з доступом за індексом, динамічний розмір.</p><pre><code>List&lt;string&gt; dirs = new(Directory.EnumerateDirectories(docPath));
+foreach (var dir in dirs) Console.WriteLine(Path.GetFileName(dir));</code></pre></section>
+    <section class="slide "><h2>Dictionary і хеш-функція</h2><div class="grid"><div><ul>
+          <li>Ключ → значення, ключі унікальні</li>
+          <li>Пошук через hash code</li>
+          <li>Колізії: кілька ключів у одному кошику</li>
+          <li>Equals + GetHashCode мають бути узгоджені</li>
+        </ul></div><div><pre><code>static int HashFunction(string s, string[] array) {
+  int total = 0;
+  foreach (char c in s) total += c;
+  return total % array.Length;
+}</code></pre></div></div></section>
+    <section class="slide "><h2>HashSet vs SortedSet</h2><div class="grid"><div><p><strong>HashSet</strong> — унікальні елементи, порядок не гарантований, швидкі union / intersect / except.</p></div><div><p><strong>SortedSet</strong> — унікальні й одразу впорядковані за зростанням. Дорожча вставка, дешевший «відсортований перегляд».</p></div></div></section>
+    <section class="slide "><h2>Stack і Queue</h2><div class="grid"><div><img class="fig" src="../lectures/assets/11-collections/image.png" alt="stack">
+        <p class="small">Stack — LIFO (undo, DFS).</p></div><div><p><strong>Queue — FIFO</strong> (черга задач, BFS, Hangfire як ідея фонових jobs).</p>
+        <pre><code>stack.Push(x); var y = stack.Pop();
+queue.Enqueue(x); var z = queue.Dequeue();</code></pre></div></div></section>
+    <section class="slide next-step"><p class="kicker">Після лекції</p><h2>Що далі</h2>
+      <p class="lead">У наступних роботах обирайте колекцію за доступом: індекс, ключ, унікальність, LIFO / FIFO — не «що перше згадали».</p></section>
+  </div>
+  <div class="chrome">
+    <span>OOP on top of C# · <b>Колекції</b></span>
+    <span style="pointer-events:auto"><a href="index.html">усі лекції</a> · <span data-counter></span> · ← → · O огляд · F повний екран</span>
+  </div>
+  <script src="shared/deck.js"></script>
+</body>
+</html>
