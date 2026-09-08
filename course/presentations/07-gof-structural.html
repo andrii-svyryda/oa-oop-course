@@ -9,27 +9,27 @@
 <body>
   <div class="progress"></div>
   <div class="deck">
-    <section class="slide title"><p class="kicker">Лекція 07</p><h1>Структурні патерни GoF</h1><p class="lead">Обгортки, спрощені фасади й дерева однотипних вузлів.</p><div class="pills"><span class="pill">Decorator</span><span class="pill">Facade</span><span class="pill">Adapter</span><span class="pill">Composite</span></div></section>
-    <section class="slide "><h2>Декоратор</h2><div class="grid"><div><img class="fig" src="../lectures/assets/07-gof-structural/image.png" alt="decorator">
-        <p class="small">Той самий контракт, додаткова поведінка без зміни оригіналу.</p></div><div><ul>
-          <li>Retry, logging, кеш, шифрування потоку</li>
-          <li>Рекурсивний: декоратор на декоратор</li>
-          <li>Клієнт не знає, що викликає обгортку</li>
+    <section class="slide title"><p class="kicker">Лекція 07</p><h1>Структурні патерни GoF</h1><p class="lead">Як збирати класи разом: обгортки, спрощені фасади й дерева однотипних вузлів.</p><div class="pills"><span class="pill">Decorator</span><span class="pill">Facade</span><span class="pill">Adapter</span><span class="pill">Composite</span></div></section>
+    <section class="slide "><h2>Декоратор</h2><p class="lead">Як додати нову поведінку, не чіпаючи старий код? Просто обгорніть його.</p><div class="grid"><div><img class="fig" src="../lectures/assets/07-gof-structural/image.png" alt="decorator">
+        <p class="small">Ми зберігаємо той самий контракт, але додаємо щось своє до або після виклику.</p></div><div><ul>
+          <li>Це ідеально підходить для retry, логування, кешу чи шифрування.</li>
+          <li>Ви можете нанизувати їх рекурсивно: декоратор на декоратор.</li>
+          <li>Клієнт навіть не здогадується, що працює з обгорткою, а не з оригіналом.</li>
         </ul></div></div></section>
-    <section class="slide "><h2>Ланцюжок відповідальності навколо IMessenger</h2><div class="grid"><div><img class="fig" src="../lectures/assets/07-gof-structural/image 1.png" alt="chain"></div><div><pre><code>public interface IMessenger {
+    <section class="slide "><h2>Декоратори над IMessenger</h2><p class="lead">Можемо додати логування чи повторні спроби, обгорнувши базовий месенджер.</p><div class="grid"><div><img class="fig" src="../lectures/assets/07-gof-structural/image 1.png" alt="chain"></div><div><pre><code>public interface IMessenger {
   void Send(Message message);
   Message Receive();
 }
 // LoggingMessenger : IMessenger
 // RetryMessenger : IMessenger
-// обидва тримають inner IMessenger</code></pre></div></div></section>
-    <section class="slide "><h2>Фасад</h2><div class="grid"><div><ul>
-          <li>Простий інтерфейс до складної підсистеми</li>
-          <li>PlaceOrder: Product + Payment + Invoice в одному методі</li>
-          <li>Клієнт не збирає оркестрацію сам</li>
+// обидва тримають inner IMessenger всередині себе</code></pre></div></div></section>
+    <section class="slide "><h2>Фасад</h2><p class="lead">Сховайте складну підсистему за єдиним простим класом.</p><div class="grid"><div><ul>
+          <li>Ви даєте клієнту простий інтерфейс замість десятка складних.</li>
+          <li>Наприклад, метод <code>PlaceOrder</code> сам викличе і Product, і Payment, і Invoice.</li>
+          <li>Клієнту більше не треба збирати цю оркестрацію вручну.</li>
         </ul></div><div><img class="fig" src="../lectures/assets/07-gof-structural/image 6.png" alt="facade"></div></div></section>
-    <section class="slide "><h2>Adapter і Composite</h2><div class="grid"><div><article class="card"><h3>Adapter</h3><p>Чужий інтерфейс → потрібний контракт. Старий логер під <code>ILogger</code>.</p></article></div><div><article class="card"><h3>Composite</h3><p>Листок і група з одним інтерфейсом. <code>IGraphic</code>: Circle і GroupOfGraphics.</p></article></div></div></section>
-    <section class="slide "><h2>Коли який</h2><ul><li>Треба додати поведінку навколо існуючого об’єкта → Decorator</li><li>Занадто багато класів, щоб зробити «одну дію» → Facade</li><li>Несумісні інтерфейси → Adapter</li><li>Дерево однотипних елементів → Composite</li></ul></section>
+    <section class="slide "><h2>Adapter і Composite</h2><p class="lead">Ще два корисних інструменти для побудови структури.</p><div class="grid"><div><article class="card"><h3>Adapter</h3><p>У вас є чужий інтерфейс, а вам потрібен ваш контракт. Наприклад, ви адаптуєте стару бібліотеку логування під сучасний <code>ILogger</code>.</p></article></div><div><article class="card"><h3>Composite</h3><p>Дозволяє працювати з окремим об’єктом і групою об’єктів однаково. Наприклад, <code>IGraphic</code> може бути як одним колом (Circle), так і групою фігур (GroupOfGraphics).</p></article></div></div></section>
+    <section class="slide "><h2>Як обрати потрібний патерн</h2><p class="lead">Правила-маркери:</p><ul><li>Хочете додати поведінку навколо існуючого об’єкта непомітно для інших? Беріть <strong>Decorator</strong>.</li><li>Клієнту доводиться смикати занадто багато класів для однієї дії? Сховайте їх за <strong>Facade</strong>.</li><li>Маєте два несумісні інтерфейси, які треба подружити? Пишіть <strong>Adapter</strong>.</li><li>Будуєте дерево елементів, де гілка поводиться так само, як листок? Це <strong>Composite</strong>.</li></ul></section>
   </div>
   <div class="chrome">
     <span>OOP on top of C# · <b>GoF: структурні</b></span>

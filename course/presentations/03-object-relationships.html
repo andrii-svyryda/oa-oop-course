@@ -9,26 +9,29 @@
 <body>
   <div class="progress"></div>
   <div class="deck">
-    <section class="slide title"><p class="kicker">Лекція 03</p><h1>Відносини між об’єктами</h1><p class="lead">Асоціація, агрегація і композиція — як об’єкти володіють одне одним.</p><div class="pills"><span class="pill">менеджер</span><span class="pill">робітник</span><span class="pill">проєкт</span></div></section>
-    <section class="slide "><h2>Три типи зв’язку</h2><div class="cols-3"><article class="card"><h3>Асоціація</h3><p class="small">Знають один про одного. Час життя не зв’язаний. Менеджер керує робітниками — без менеджера робітники лишаються.</p></article><article class="card"><h3>Агрегація</h3><p class="small">Ціле і частини, частина живе окремо. Проєкт закрили — робітник лишається в компанії.</p></article><article class="card"><h3>Композиція</h3><p class="small">Частина не існує без цілого. Дім і кімната. У коді — private поле, створене всередині власника.</p></article></div></section>
-    <section class="slide "><h2>Код: компанія</h2><pre><code>public class Project {
-  public List&lt;Worker&gt; Team { get; } = new(); // агрегація
+    <section class="slide title"><p class="kicker">Лекція 03</p><h1>Відносини між об’єктами</h1><p class="lead">Асоціація, агрегація та композиція: як об’єкти володіють одне одним і хто за кого відповідає.</p><div class="pills"><span class="pill">менеджер</span><span class="pill">робітник</span><span class="pill">проєкт</span></div></section>
+    <section class="slide "><h2>Три типи зв’язку</h2><p class="lead">Наскільки об’єкти залежать один від одного?</p><div class="cols-3"><article class="card"><h3>Асоціація</h3><p class="small">Вони просто знають одне про одного, але їхній час життя не зв’язаний. Наприклад, менеджер керує робітниками. Звільнили менеджера — робітники лишаються працювати.</p></article><article class="card"><h3>Агрегація</h3><p class="small">Тут уже є ціле і його частини, але частина може жити окремо. Проєкт закрили — робітник просто переходить на інший, він лишається в компанії.</p></article><article class="card"><h3>Композиція</h3><p class="small">Найжорсткіший зв’язок: частина не існує без цілого. Зруйнували дім — зникла і кімната. У коді це зазвичай private поле, яке створюється прямо всередині власника.</p></article></div></section>
+    <section class="slide "><h2>Як це виглядає в коді</h2><p class="lead">Хто кого створює.</p><pre><code>public class Project {
+  public List&lt;Worker&gt; Team { get; } = new(); // агрегація: ми просто додаємо існуючих робітників
 }
 
 public class Company {
-  private readonly List&lt;Manager&gt; _managers = new(); // композиція
+  private readonly List&lt;Manager&gt; _managers = new(); // композиція: компанія сама створює менеджерів
   public Manager HireManager(string name) {
     var m = new Manager(name);
     _managers.Add(m);
     return m;
   }
 }</code></pre></section>
-    <section class="slide "><h2>Як розрізнити їх на іспиті</h2><ul><li>Хто створює об’єкт? Якщо власник — підозра на композицію</li><li>Чи можна передати частину в інше ціле? Так → агрегація / асоціація</li><li>UML: композиція — зафарбований ромб, агрегація — порожній</li></ul></section>
-    <section class="slide "><h2>Місток до DI</h2><p class="lead">Якщо об’єкт не створює залежність сам, а отримує її ззовні — це вже асоціація і крок до впровадження залежностей.</p></section>
+    <section class="slide "><h2>Як розрізнити їх на іспиті</h2><p class="lead">Кілька простих питань:</p><ul><li>Хто створює об’єкт? Якщо власник робить це сам — у вас підозра на композицію.</li><li>Чи можна передати цю частину в інше ціле? Якщо так — це агрегація або асоціація.</li><li>Як це малювати на UML? Композиція — це зафарбований ромб, а агрегація — порожній.</li></ul></section>
+    <section class="slide "><h2>Місток до DI</h2><p class="lead">Зверніть увагу: якщо об’єкт не створює залежність сам, а отримує її ззовні — ми послаблюємо зв’язок до асоціації. Це ваш перший крок до впровадження залежностей (Dependency Injection).</p></section>
     <section class="slide "><h2>Що почитати</h2><ul>
       <li><a href="https://www.c-sharpcorner.com/article/difference-between-composition-and-aggregation/">Composition vs Aggregation</a></li>
       <li><a href="https://stackoverflow.com/questions/12604031/c-sharp-code-for-association-aggregation-composition">SO: association / aggregation / composition</a></li>
     </ul></section>
+    <section class="slide next-step"><p class="kicker">Після лекції</p><h2>Що далі</h2>
+      <p class="lead">Далі — SOLID: п’ять правил, які роблять такі зв’язки придатними до змін.</p>
+      <p class="note">До речі, <code>List&lt;T&gt;</code> у коді — це вже знайомий вам матеріал з лекції 02. Нових колекцій сьогодні немає.</p></section>
   </div>
   <div class="chrome">
     <span>OOP on top of C# · <b>Відносини між об’єктами</b></span>

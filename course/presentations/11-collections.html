@@ -9,26 +9,46 @@
 <body>
   <div class="progress"></div>
   <div class="deck">
-    <section class="slide title"><p class="kicker">Лекція 11</p><h1>Колекції в C#</h1><p class="lead">Яку структуру обрати — питання інваріантів доступу, а не «що перше згадали».</p><div class="pills"><span class="pill">List</span><span class="pill">Dictionary</span><span class="pill">HashSet</span><span class="pill">Stack / Queue</span></div></section>
-    <section class="slide "><h2>List&lt;T&gt;</h2><p class="lead">Типізований список з доступом за індексом, динамічний розмір.</p><pre><code>List&lt;string&gt; dirs = new(Directory.EnumerateDirectories(docPath));
-foreach (var dir in dirs) Console.WriteLine(Path.GetFileName(dir));</code></pre></section>
-    <section class="slide "><h2>Dictionary і хеш-функція</h2><div class="grid"><div><ul>
-          <li>Ключ → значення, ключі унікальні</li>
-          <li>Пошук через hash code</li>
-          <li>Колізії: кілька ключів у одному кошику</li>
-          <li>Equals + GetHashCode мають бути узгоджені</li>
+    <section class="slide title"><p class="kicker">Лекція 11</p><h1>Колекції в C#</h1><p class="lead">Обирайте колекцію за типом доступу, а не ту, що першою спала на думку.</p><div class="pills"><span class="pill">List</span><span class="pill">Dictionary</span><span class="pill">HashSet</span><span class="pill">Stack / Queue</span></div></section>
+    <section class="slide "><h2>Що ми вже знаємо, а що розберемо сьогодні</h2>
+      <p class="lead">Ми не будемо повторювати generics. Зосередимось на виборі правильної структури даних.</p>
+      <ul>
+        <li>На лекції 02 ми вже розібрали, чому варто використовувати <code>List&lt;T&gt;</code>, а не застарілий <code>ArrayList</code> чи <code>List&lt;object&gt;</code>.</li>
+        <li>Сьогодні ми поговоримо про те, як працює хеш і що таке колізії.</li>
+        <li>Також розберемося, коли брати <code>HashSet</code> або <code>SortedSet</code>, і для яких задач ідеально підходять Stack та Queue.</li>
+      </ul>
+    </section>
+    <section class="slide "><h2>Коли варто брати List&lt;T&gt;</h2>
+      <p class="lead">Беріть список, коли вам важливий порядок елементів, ви хочете звертатися до них за індексом, і колекція буде рости. Але якщо ви шукаєте за ключем — List вам не підійде.</p>
+      <pre><code>List&lt;string&gt; dirs = new(Directory.EnumerateDirectories(docPath));
+foreach (var dir in dirs) Console.WriteLine(Path.GetFileName(dir));</code></pre>
+    </section>
+    <section class="slide "><h2>Dictionary і хеш-функції</h2><p class="lead">Словник — це швидкий пошук значення за унікальним ключем.</p><div class="grid"><div><ul>
+          <li>Він працює так швидко завдяки пошуку через hash code.</li>
+          <li>Іноді трапляються колізії: це коли кілька різних ключів потрапляють у один кошик.</li>
+          <li>Саме тому ваші методи <code>Equals</code> та <code>GetHashCode</code> завжди мають бути узгоджені.</li>
         </ul></div><div><pre><code>static int HashFunction(string s, string[] array) {
   int total = 0;
   foreach (char c in s) total += c;
-  return total % array.Length;
+  return total % array.Length; // дуже спрощений приклад хеш-функції
 }</code></pre></div></div></section>
-    <section class="slide "><h2>HashSet vs SortedSet</h2><div class="grid"><div><p><strong>HashSet</strong> — унікальні елементи, порядок не гарантований, швидкі union / intersect / except.</p></div><div><p><strong>SortedSet</strong> — унікальні й одразу впорядковані за зростанням. Дорожча вставка, дешевший «відсортований перегляд».</p></div></div></section>
-    <section class="slide "><h2>Stack і Queue</h2><div class="grid"><div><img class="fig" src="../lectures/assets/11-collections/image.png" alt="stack">
-        <p class="small">Stack — LIFO (undo, DFS).</p></div><div><p><strong>Queue — FIFO</strong> (черга задач, BFS, Hangfire як ідея фонових jobs).</p>
+    <section class="slide "><h2>HashSet проти SortedSet</h2><p class="lead">Коли вам потрібна лише множина унікальних елементів.</p><div class="grid"><div><p><strong>HashSet</strong> гарантує унікальність, але не зберігає порядок. Зате він миттєво робить математичні операції: об’єднання (union), перетин (intersect) чи різницю (except).</p></div><div><p><strong>SortedSet</strong> теж зберігає лише унікальні елементи, але одразу сортує їх за зростанням. Вставка сюди обійдеться дорожче, зате ви завжди маєте відсортований набір.</p></div></div></section>
+    <section class="slide "><h2>Stack і Queue</h2><p class="lead">Дві класичні структури для специфічних задач.</p><div class="grid"><div><img class="fig" src="../lectures/assets/11-collections/image.png" alt="stack">
+        <p class="small">Stack працює за принципом LIFO (останній зайшов — перший вийшов). Ідеально для скасування дій (undo) або обходу в глибину (DFS).</p></div><div><p><strong>Queue</strong> — це FIFO (перший зайшов — перший вийшов). Використовуйте для черги задач, обходу в ширину (BFS) або фонових робіт.</p>
         <pre><code>stack.Push(x); var y = stack.Pop();
 queue.Enqueue(x); var z = queue.Dequeue();</code></pre></div></div></section>
+    <section class="slide "><h2>Пам’ятка: як обрати колекцію</h2>
+      <p class="lead">Задайте собі питання: як я буду з нею працювати?</p>
+      <ul>
+        <li>Потрібен індекс і збереження порядку? Беріть <code>List&lt;T&gt;</code>.</li>
+        <li>Шукаєте значення за ключем? Ваш вибір — <code>Dictionary&lt;TKey,TValue&gt;</code>.</li>
+        <li>Важлива лише унікальність? Це <code>HashSet&lt;T&gt;</code>. А якщо ще й відсортовано — <code>SortedSet&lt;T&gt;</code>.</li>
+        <li>Останній зайшов — перший вийшов? Це <code>Stack&lt;T&gt;</code>. Перший зайшов — перший вийшов? Тоді <code>Queue&lt;T&gt;</code>.</li>
+      </ul>
+    </section>
     <section class="slide next-step"><p class="kicker">Після лекції</p><h2>Що далі</h2>
-      <p class="lead">У наступних роботах обирайте колекцію за доступом: індекс, ключ, унікальність, LIFO / FIFO — не «що перше згадали».</p></section>
+      <p class="lead">У наступних лабораторних роботах свідомо обирайте колекцію за типом доступу: чи потрібен вам індекс, ключ, унікальність, LIFO чи FIFO. Не пишіть List просто за звичкою.</p>
+      <p class="note">І пам’ятайте: generics і boxing ми сьогодні не чіпали — ми розібралися з цим ще на лекції 02.</p></section>
   </div>
   <div class="chrome">
     <span>OOP on top of C# · <b>Колекції</b></span>

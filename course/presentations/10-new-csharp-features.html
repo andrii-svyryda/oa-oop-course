@@ -9,37 +9,51 @@
 <body>
   <div class="progress"></div>
   <div class="deck">
-    <section class="slide title"><p class="kicker">Лекція 10</p><h1>Нові можливості C# та ООП</h1><p class="lead">Сучасний синтаксис не скасовує ООП — він робить моделі коротшими.</p><div class="pills"><span class="pill">tuples</span><span class="pill">records</span><span class="pill">operators</span><span class="pill">patterns</span></div></section>
-    <section class="slide "><h2>Навіщо ця лекція</h2><ul><li>Сучасний C# скорочує шаблонний код навколо ООП-моделей</li><li>Мета: не писати зайві DTO і не ламати інкапсуляцію «для зручності»</li></ul></section>
-    <section class="slide "><h2>Кортежі замість одноразових DTO</h2><pre><code>(string name, decimal price) Offer(string sku) =&gt; (sku, 19.99m);
+    <section class="slide title"><p class="kicker">Лекція 10</p><h1>Нові можливості C# та ООП</h1><p class="lead">Сучасний синтаксис не скасовує ООП — він просто дозволяє писати коротше і виразніше.</p><div class="pills"><span class="pill">tuples</span><span class="pill">records</span><span class="pill">operators</span><span class="pill">patterns</span></div></section>
+    <section class="slide "><h2>Навіщо нам ця лекція</h2><p class="lead">Пишемо менше шаблонного коду.</p><ul>
+      <li>Сучасний C# дозволяє описувати моделі лаконічніше.</li>
+      <li>Мета — перестати плодити зайві DTO і не ламати інкапсуляцію заради зручності.</li>
+      <li>Ми вже розібрали базове ООП, generics та default methods. Сьогодні подивимось на зручний синтаксис навколо них.</li>
+    </ul></section>
+    <section class="slide "><h2>Кортежі замість одноразових DTO</h2><p class="lead">Треба повернути два значення з методу? Не створюйте для цього окремий клас, візьміть кортеж (tuple).</p><pre><code>(string name, decimal price) Offer(string sku) =&gt; (sku, 19.99m);
 
 var (name, price) = Offer(&quot;ABC&quot;);
 var t = (Title: &quot;OOP&quot;, Hours: 16);
 Console.WriteLine($&quot;{t.Title}: {t.Hours} год&quot;);</code></pre></section>
-    <section class="slide "><h2>implicit / explicit operator</h2><pre><code>public readonly struct Meters {
+    <section class="slide "><h2>implicit / explicit operator</h2>
+      <p class="lead">Ви можете навчити ваші типи перетворюватися один в одного.</p>
+      <p class="note">Зверніть увагу: це не boxing. Boxing ми вчили на лекції 02 (це коли value type пакується в <code>object</code>). Тут ви самі задаєте чітке правило перетворення між своїми типами.</p>
+      <pre><code>public readonly struct Meters {
   public double Value { get; }
   public Meters(double value) =&gt; Value = value;
   public static implicit operator Meters(double v) =&gt; new(v);
   public static explicit operator double(Meters m) =&gt; m.Value;
 }
-Meters m = 1.5;          // implicit
-double raw = (double)m;  // explicit</code></pre></section>
-    <section class="slide "><h2>record і value-based equality</h2><pre><code>public record Person(string Name, int Age);
+Meters m = 1.5;          // implicit: компілятор робить це сам
+double raw = (double)m;  // explicit: ми явно просимо перетворення</code></pre></section>
+    <section class="slide "><h2>record і value-based equality</h2><p class="lead">Records ідеальні для даних. Вони автоматично порівнюються за значеннями полів, а не за посиланнями.</p><pre><code>public record Person(string Name, int Age);
 public record struct Point(int X, int Y);
 
 var a = new Person(&quot;Ann&quot;, 20);
-var b = a with { Age = 21 }; // незмінна копія
-Console.WriteLine(a == new Person(&quot;Ann&quot;, 20)); // True</code></pre></section>
+var b = a with { Age = 21 }; // створюємо незмінну копію з новою властивістю
+Console.WriteLine(a == new Person(&quot;Ann&quot;, 20)); // True, бо дані однакові</code></pre></section>
     <section class="slide "><h2>Pattern matching поруч із поліморфізмом</h2>
-      <p class="lead">Patterns зручні для даних. Ієрархія типів лишається для поведінки, яка росте.</p>
+      <p class="lead">Patterns чудово підходять для розбору даних. Але пам’ятайте: класична ієрархія типів лишається для поведінки, яку ми плануємо розширювати.</p>
       <pre><code>string Label(IShape s) =&gt; s switch {
   Circle c =&gt; $&quot;circle r={c.Radius}&quot;,
   Square sq =&gt; $&quot;square {sq.Side}&quot;,
   _ =&gt; &quot;unknown&quot;
 };</code></pre></section>
-    <section class="slide "><h2>Default interface methods</h2><ul><li>Спільна поведінка контракту без абстрактного класу</li><li>Не замінює стратегію / DI — лише прибирає дублювання</li><li>Джерела: docs.microsoft.com і Pro C# 10</li></ul></section>
+    <section class="slide "><h2>Default interface methods — уже вміємо</h2>
+      <p class="lead">Що ви вже застосовували в лабораторних.</p>
+      <ul>
+        <li>На лекції 01 ми бачили, як описати спільний алгоритм прямо в контракті.</li>
+        <li>Сьогодні це лише нагадування: це просто синтаксис, він не замінює патерн стратегії чи DI.</li>
+        <li>А от що дійсно нове сьогодні — це tuples, operators, records та patterns.</li>
+      </ul>
+    </section>
     <section class="slide next-step"><p class="kicker">Після лекції</p><h2>Що далі</h2>
-      <p class="lead">Підготуйте доповідь про патерн, якого не було в лекціях: підготуйте UML і несинтетичний приклад на C#.</p></section>
+      <p class="lead">Ваше завдання: підготуйте доповідь про будь-який патерн, якого ми не розглядали на лекціях. Намалюйте UML і напишіть реальний, несинтетичний приклад на C#.</p></section>
   </div>
   <div class="chrome">
     <span>OOP on top of C# · <b>Нові можливості C#</b></span>

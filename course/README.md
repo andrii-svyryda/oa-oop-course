@@ -8,6 +8,7 @@
 course/
   lectures/          # конспекти лекцій
   presentations/     # HTML-презентації (слайди) до кожної лекції
+  post-presentations/  # додаткові md-матеріали «на наступне заняття»
   labs/
     general/         # лабораторні роботи загального плану
     individual/      # лабораторні роботи індивідуального плану
@@ -16,6 +17,7 @@ course/
 
 - Лекції: [lectures/README.md](lectures/README.md)
 - Презентації (HTML): [presentations/index.html](presentations/index.html)
+- Пост-презентації (md): [post-presentations/README.md](post-presentations/README.md)
 - Лабораторні (загальний план): [labs/general/README.md](labs/general/README.md)
 - Лабораторні (індивідуальний план): [labs/individual/README.md](labs/individual/README.md)
 

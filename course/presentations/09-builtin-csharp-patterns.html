@@ -9,29 +9,37 @@
 <body>
   <div class="progress"></div>
   <div class="deck">
-    <section class="slide title"><p class="kicker">Лекція 09</p><h1>Вбудовані шаблони C#</h1><p class="lead">GoF уже «зашитий» у BCL — не винаходьте велосипед, розпізнайте його.</p><div class="pills"><span class="pill">Lazy&lt;T&gt;</span><span class="pill">event</span><span class="pill">IEnumerable</span><span class="pill">ICloneable</span></div></section>
-    <section class="slide "><h2>Що вже є в BCL</h2><div class="cols-3"><article class="card"><h3>Singleton</h3><p class="small"><code>Lazy&lt;T&gt;</code> — thread-safe відкладене створення.</p></article><article class="card"><h3>Observer</h3><p class="small"><code>event</code> і <code>IObservable&lt;T&gt;</code>.</p></article><article class="card"><h3>Builder</h3><p class="small"><code>StringBuilder</code>, fluent HTTP / Polly.</p></article></div></section>
-    <section class="slide "><h2>Ще три впізнавані шаблони</h2><div class="cols-3"><article class="card"><h3>Prototype</h3><p class="small"><code>ICloneable</code> + <code>MemberwiseClone</code> (shallow!).</p></article><article class="card"><h3>Iterator</h3><p class="small"><code>IEnumerable</code> / <code>foreach</code> / <code>yield</code>.</p></article><article class="card"><h3>Factory</h3><p class="small"><code>Activator.CreateInstance</code> за іменем типу.</p></article></div></section>
-    <section class="slide "><h2>Lazy&lt;T&gt; як одинак</h2><pre><code>public sealed class AppConfig {
+    <section class="slide title"><p class="kicker">Лекція 09</p><h1>Вбудовані шаблони C#</h1><p class="lead">Багато патернів GoF уже є в BCL. Розпізнавайте їх, щоб не писати зайвого коду.</p><div class="pills"><span class="pill">Lazy&lt;T&gt;</span><span class="pill">event</span><span class="pill">IEnumerable</span><span class="pill">ICloneable</span></div></section>
+    <section class="slide "><h2>Що вже є в BCL</h2><p class="lead">Ви вже користуєтесь цими патернами, можливо, не знаючи їхніх назв.</p><div class="cols-3"><article class="card"><h3>Singleton</h3><p class="small">Замість самописних блокувань використовуйте <code>Lazy&lt;T&gt;</code> — це готове thread-safe відкладене створення об’єкта.</p></article><article class="card"><h3>Observer</h3><p class="small">Звичайні <code>event</code> або інтерфейс <code>IObservable&lt;T&gt;</code> — це класичний спостерігач. Хтось публікує, інші підписуються.</p></article><article class="card"><h3>Builder</h3><p class="small">Знайомий вам <code>StringBuilder</code> або fluent-налаштування HTTP-клієнта — це все будівельники, які крок за кроком збирають результат.</p></article></div></section>
+    <section class="slide "><h2>Ще три впізнавані шаблони</h2><div class="cols-3"><article class="card"><h3>Prototype</h3><p class="small">Інтерфейс <code>ICloneable</code> та метод <code>MemberwiseClone</code> дозволяють клонувати об’єкти. Але пам’ятайте: це поверхневе копіювання (shallow copy).</p></article><article class="card"><h3>Iterator</h3><p class="small">Коли ви пишете <code>foreach</code>, повертаєте <code>IEnumerable</code> або використовуєте <code>yield</code> — ви працюєте з ітератором.</p></article><article class="card"><h3>Factory</h3><p class="small">Метод <code>Activator.CreateInstance</code> вміє створювати об’єкти за іменем типу — чим не фабрика?</p></article></div></section>
+    <section class="slide "><h2>Lazy&lt;T&gt; як одинак</h2><p class="lead">Ось як просто тепер виглядає Singleton. Ніяких <code>lock</code>, усе робить сам фреймворк.</p><pre><code>public sealed class AppConfig {
   private static readonly Lazy&lt;AppConfig&gt; _lazy =
     new(() =&gt; new AppConfig());
   public static AppConfig Instance =&gt; _lazy.Value;
-  private AppConfig() { /* load once */ }
+  private AppConfig() { /* завантажуємо конфіг лише раз */ }
 }</code></pre></section>
-    <section class="slide "><h2>Прототип і копіювання</h2><div class="grid"><div><img class="fig" src="../lectures/assets/09-builtin-csharp-patterns/Untitled 1.png" alt="prototype"></div><div><pre><code>class Car : ICloneable {
+    <section class="slide "><h2>Прототип і копіювання</h2><p class="lead">Якщо вам треба зробити копію об’єкта, реалізуйте <code>ICloneable</code>.</p><div class="grid"><div><img class="fig" src="../lectures/assets/09-builtin-csharp-patterns/Untitled 1.png" alt="prototype"></div><div><pre><code>class Car : ICloneable {
   private int width;
   public object Clone() =&gt; new Car(this.width);
 }
 Car two = (Car)carOne.Clone();
-// MemberwiseClone копіює посилання, не графи</code></pre></div></div></section>
-    <section class="slide "><h2>IObservable — спостерігач у бібліотеці</h2><pre><code>var range = Observable.Range(10, 15);
+// Зверніть увагу: MemberwiseClone копіює лише посилання, а не весь граф об’єктів.</code></pre></div></div></section>
+    <section class="slide "><h2>IObservable — спостерігач у бібліотеці</h2><p class="lead">Сучасний підхід до подій — це реактивні потоки даних.</p><pre><code>var range = Observable.Range(10, 15);
 range.Subscribe(Console.WriteLine, () =&gt; Console.WriteLine(&quot;Completed&quot;));
 
 var fromEnum = new List&lt;string&gt; { &quot;a&quot;, &quot;b&quot;, &quot;c&quot; }.ToObservable();
 fromEnum.Subscribe(Console.WriteLine);</code></pre></section>
-    <section class="slide "><h2>Питання для самоперевірки</h2><ul><li>Стовпи ООП, virtual / override / overload, sealed, boxing</li><li>Generics constraints, covariance, reflection, IDisposable</li><li>SOLID на пальцях + навіщо IoC</li></ul></section>
+    <section class="slide "><h2>Питання для самоперевірки</h2>
+      <p class="lead">Чи можете пояснити своїми словами те, що вже було в курсі?</p>
+      <ul>
+        <li>Стовпи ООП, різницю між virtual / override / overload, для чого потрібен sealed, як працює upcast та downcast.</li>
+        <li>Що таке boxing і constraints (ми розбирали це на лекції 02). Не плутайте їх з <code>implicit operator</code>.</li>
+        <li>Принципи SOLID своїми словами та навіщо нам потрібен IoC.</li>
+      </ul>
+      <p class="note">Повний список питань до інтерв’ю ви знайдете в лабораторній 15. Covariance і reflection також є там, ми не виносимо їх в окремі лекції.</p>
+    </section>
     <section class="slide next-step"><p class="kicker">Після лекції</p><h2>Що далі</h2>
-      <p class="lead">Підготуйтеся до технічного інтерв’ю: пройдіться за повним списком запитань з плану курсу.</p></section>
+      <p class="lead">Час готуватися до технічного інтерв’ю. Пройдіться за повним списком запитань з плану курсу і перевірте себе.</p></section>
   </div>
   <div class="chrome">
     <span>OOP on top of C# · <b>Вбудовані шаблони C#</b></span>

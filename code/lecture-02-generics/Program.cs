@@ -2,6 +2,9 @@
 
 Console.WriteLine("=== Lecture 02: Generics ===\n");
 
+BoxingCastDemo.Run();
+Console.WriteLine();
+
 SwapDemo.Run();
 Console.WriteLine();
 

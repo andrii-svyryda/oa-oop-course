@@ -9,19 +9,19 @@
 <body>
   <div class="progress"></div>
   <div class="deck">
-    <section class="slide title"><p class="kicker">Лекція 01</p><h1>Теорія ООП</h1><p class="lead">Чотири стовпи, розширювальні методи, делегати і LINQ — основа решти курсу.</p><div class="pills"><span class="pill">абстракція</span><span class="pill">інкапсуляція</span><span class="pill">наслідування</span><span class="pill">поліморфізм</span></div></section>
-    <section class="slide "><h2>План заняття</h2><ul><li>Абстрактні класи та інтерфейси (у т.ч. default methods)</li><li>Інкапсуляція: поля, властивості, публічний контракт</li><li>Наслідування: <code>base</code>, <code>virtual</code>, <code>sealed</code></li><li>Поліморфізм: overload vs override</li><li>Extension methods, делегати, <code>yield</code>, LINQ</li></ul></section>
+    <section class="slide title"><p class="kicker">Лекція 01</p><h1>Теорія ООП</h1><p class="lead">Чотири стовпи ООП, розширювальні методи, делегати та LINQ — база, на якій тримається весь курс.</p><div class="pills"><span class="pill">абстракція</span><span class="pill">інкапсуляція</span><span class="pill">наслідування</span><span class="pill">поліморфізм</span></div></section>
+    <section class="slide "><h2>Про що сьогодні поговоримо</h2><ul><li>Подивимось, як абстрактні класи та інтерфейси (навіть із default methods) допомагають будувати гнучку архітектуру.</li><li>Розберемо, чому інкапсуляція — це не просто приватні поля, а надійний публічний контракт.</li><li>Пройдемо наслідування та ключові слова <code>base</code>, <code>virtual</code> і <code>sealed</code>.</li><li>Зрозуміємо поліморфізм: як працюють overload та override, і чим відрізняються upcast і downcast.</li><li>І наостанок — як extension methods, делегати та <code>yield</code> лежать в основі LINQ.</li></ul></section>
     <section class="slide "><h2>Абстракція</h2>
-      <p class="lead">Приховуємо деталі імплементації й лишаємо лише головні характеристики об’єкта.</p>
+      <p class="lead">Ми приховуємо зайві деталі реалізації, щоб залишити лише те, що дійсно важливо для нашої задачі.</p>
       <ul>
-        <li>Мета — спростити розуміння, не «показати все»</li>
-        <li>У C# абстракції будують <strong>абстрактні класи</strong> та <strong>інтерфейси</strong></li>
+        <li>Наша мета — спростити використання коду, а не виставляти назовні всі деталі системи.</li>
+        <li>У C# ми будуємо такі абстракції за допомогою <strong>абстрактних класів</strong> та <strong>інтерфейсів</strong>.</li>
       </ul></section>
     <section class="slide "><h2>Абстрактний клас</h2><div class="grid"><div><ul>
-          <li>Не можна створити екземпляр</li>
-          <li>Може мати абстрактні методи й властивості</li>
-          <li>Нащадок мусить реалізувати всі абстрактні члени</li>
-          <li><span class="note">Немає <code>abstract static</code> — static належить типу, не об’єкту</span></li>
+          <li>Ви не можете створити екземпляр абстрактного класу — це лише шаблон для інших.</li>
+          <li>Він дозволяє описати абстрактні методи й властивості, які не мають тіла.</li>
+          <li>Якщо ви наслідуєте такий клас, ви зобов’язані реалізувати всі його абстрактні члени.</li>
+          <li><span class="note">До речі, <code>abstract static</code> не буває, бо статика належить типу, а не конкретному об’єкту.</span></li>
         </ul></div><div><pre><code>abstract class Shape {
   public abstract int GetArea();
 }
@@ -31,11 +31,11 @@ class Square : Shape {
   public Square(int size) =&gt; sideSize = size;
   public override int GetArea() =&gt; sideSize * sideSize;
 }</code></pre></div></div></section>
-    <section class="slide "><h2>Інтерфейс — контракт</h2><div class="grid"><div><ul>
-          <li>Методи, властивості, індексатори, події</li>
-          <li>Клас / record / struct зобов’язані реалізувати контракт</li>
-          <li>Не інстанціюємо інтерфейс</li>
-          <li>Клієнт працює з абстракцією: масив <code>IShapeAreaCalculator[]</code></li>
+    <section class="slide "><h2>Інтерфейс — це суворий контракт</h2><div class="grid"><div><ul>
+          <li>Він лише описує, що має вміти тип: які там є методи, властивості чи події.</li>
+          <li>Будь-який клас, record чи struct, що підписує цей контракт, зобов’язаний його виконати.</li>
+          <li>Ви не можете створити екземпляр самого інтерфейсу, бо там немає реалізації.</li>
+          <li>Зате ваш код може працювати з абстракцією, наприклад, приймати масив <code>IShapeAreaCalculator[]</code>, не знаючи конкретних фігур.</li>
         </ul></div><div><pre><code>interface IShapeAreaCalculator {
   double GetArea();
   string WhoAmI { get; }
@@ -46,7 +46,7 @@ class Circle : IShapeAreaCalculator {
   public string WhoAmI =&gt; GetType().ToString();
 }</code></pre></div></div></section>
     <section class="slide "><h2>Default interface methods</h2>
-      <p>Реалізація за замовчуванням у інтерфейсі: спільний алгоритм спирається на абстрактні кроки.</p>
+      <p class="lead">Іноді зручно дати інтерфейсу дефолтну реалізацію: ми пишемо спільний алгоритм, який викликає інші, ще не реалізовані методи.</p>
       <pre><code>interface ISecureCardReader {
   void InitializeCardReader();
   void CloseCardReader();
@@ -60,10 +60,10 @@ class Circle : IShapeAreaCalculator {
   }
 }</code></pre></section>
     <section class="slide "><h2>Інкапсуляція</h2><div class="grid"><div><ul>
-          <li>Внутрішній стан прихований</li>
-          <li>Доступ лише через публічний інтерфейс</li>
-          <li>Модифікатори: <code>public</code>, <code>private</code>, <code>protected</code>, <code>internal</code></li>
-          <li>Публічне <strong>поле</strong> ламає контроль; публічна <strong>властивість</strong> — ні</li>
+          <li>Ми ховаємо внутрішній стан об’єкта, щоб ніхто не міг зламати його ззовні.</li>
+          <li>Увесь доступ іде лише через чітко визначений публічний інтерфейс.</li>
+          <li>Для цього ми використовуємо модифікатори доступу: <code>public</code>, <code>private</code>, <code>protected</code>, <code>internal</code>.</li>
+          <li>Ніколи не робіть <strong>поля</strong> публічними — ви втратите контроль над даними. Використовуйте <strong>властивості</strong>, щоб перевіряти значення перед записом.</li>
         </ul></div><div><pre><code>public class Account {
   private decimal balance;
   public decimal Balance =&gt; balance;
@@ -76,37 +76,61 @@ class Circle : IShapeAreaCalculator {
 }</code></pre></div></div></section>
     <section class="slide "><h2>Наслідування</h2>
       <ul>
-        <li>Похідний клас повторно використовує й розширює базовий</li>
-        <li>Доступні <code>public</code> / <code>protected</code> / <code>internal</code>; <code>private</code> — ні</li>
-        <li><code>virtual</code> + <code>override</code>; звертання до батька — <code>base</code></li>
-        <li><code>sealed</code> забороняє наслідування або подальше override</li>
-        <li class="bad">Немає множинного наслідування класів — лише багато інтерфейсів</li>
+        <li>Ви створюєте похідний клас, щоб не писати код з нуля, а перевикористати й розширити базовий.</li>
+        <li>Нащадку доступно все, що <code>public</code>, <code>protected</code> або <code>internal</code>, але <code>private</code> залишається таємницею батька.</li>
+        <li>Щоб змінити поведінку, ми використовуємо <code>virtual</code> та <code>override</code>, а до старого коду звертаємось через <code>base</code>.</li>
+        <li>Якщо хочете заборонити наслідування вашого класу, просто додайте <code>sealed</code>.</li>
+        <li class="bad">У C# немає множинного наслідування класів, щоб уникнути хаосу — натомість реалізовуйте скільки завгодно інтерфейсів.</li>
       </ul></section>
-    <section class="slide "><h2>Приклад: Person → Student / Teacher</h2><pre><code>public class Student : Person {
+    <section class="slide "><h2>Приклад: Person → Student</h2>
+      <p class="lead">Зверніть увагу, як конструктор студента передає базові дані в конструктор <code>Person</code> через <code>base</code>, а сам ініціалізує лише своє.</p>
+      <pre><code>public class Student : Person {
   public string StudentEmail { get; private set; }
   public Student(string name, int age, string address, string email)
       : base(name, age, address) {
     StudentEmail = email;
   }
 }</code></pre></section>
-    <section class="slide "><h2>Поліморфізм</h2><div class="grid"><div><p><strong>Статичний</strong> (компіляція)</p>
-        <ul><li>перевантаження методів</li><li>перевантаження операторів</li></ul>
-        <p><strong>Динамічний</strong> (runtime)</p>
-        <ul><li><code>virtual</code> / <code>override</code></li>
-        <li>виклик через базовий тип запускає метод нащадка</li></ul></div><div><pre><code>public int Add(int a, int b) =&gt; a + b;
+    <section class="slide "><h2>Поліморфізм</h2><div class="grid"><div><p><strong>Статичний</strong> (компілятор обирає під час збірки)</p>
+        <ul><li>Перевантаження методів (overload): компілятор дивиться на типи аргументів і підставляє правильний метод.</li><li>Перевантаження операторів.</li></ul>
+        <p><strong>Динамічний</strong> (runtime обирає під час виконання)</p>
+        <ul><li>Працює через <code>virtual</code> та <code>override</code>.</li>
+        <li>Коли ви викликаєте метод через базовий тип, програма сама розуміє, який об’єкт там насправді, і запускає метод нащадка.</li></ul></div><div><pre><code>public int Add(int a, int b) =&gt; a + b;
 public double Add(double a, double b) =&gt; a + b;
 
 List&lt;Shape&gt; shapes = [new Rectangle(...), new Triangle(...)];
 foreach (var s in shapes) s.Draw(); // динамічний</code></pre></div></div></section>
-    <section class="slide "><h2>Розширювальні методи</h2><div class="grid"><div><ul><li>Статичний клас, перший параметр з <code>this</code></li><li>Виклик як у члена типу</li><li>Існуючий метод типу має пріоритет</li><li>Типовий приклад: розбити рядок на слова й порахувати їх</li></ul></div><div><pre><code>public static class StringExtension {
+    <section class="slide "><h2>Upcast і downcast</h2>
+      <div class="grid">
+        <div>
+          <p><strong>Upcast</strong> — це перехід від нащадка до батька. Це завжди безпечно: квадрат гарантовано є фігурою.</p>
+          <pre><code>Shape s = new Square(3);
+s.GetArea();</code></pre>
+          <p><strong>Downcast</strong> — від батька до нащадка. Це небезпечно: не кожна фігура є квадратом, тому програма може впасти.</p>
+          <pre><code>Square sq = (Square)s;
+Square? ok = s as Square;
+if (s is Square square) { }</code></pre>
+        </div>
+        <div>
+          <ul>
+            <li>Увесь поліморфізм тримається на upcast: ми складаємо різні фігури в один список <code>Shape</code> і працюємо з ними однаково.</li>
+            <li>Якщо вам конче треба зробити downcast, використовуйте <code>is</code> або <code>as</code>, щоб уникнути помилок під час виконання.</li>
+            <li class="note">А от перетворення value type в <code>object</code> — це вже boxing. Про нього поговоримо на наступній лекції.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+    <section class="slide "><h2>Розширювальні методи</h2><div class="grid"><div><ul><li>Ви можете додати нові методи до чужих класів, створивши статичний метод із ключовим словом <code>this</code> перед першим параметром.</li><li>У коді це виглядає так, ніби метод завжди був частиною цього типу.</li><li>Але пам’ятайте: якщо в класі вже є метод із таким самим ім’ям, він матиме пріоритет.</li><li>Типовий приклад: ми вчимо звичайний рядок розбиватися на слова та рахувати їхню кількість.</li></ul></div><div><pre><code>public static class StringExtension {
   public static string[] ToWords(this string str)
     =&gt; str.Split([&#x27; &#x27;, &#x27;.&#x27;, &#x27;?&#x27;],
          StringSplitOptions.RemoveEmptyEntries);
   public static int WordsCount(this string str)
     =&gt; str.ToWords().Length;
 }</code></pre></div></div></section>
-    <section class="slide "><h2>LINQ стоїть на трьох ніжках</h2><div class="cols-3"><article class="card"><h3>Extension methods</h3><p class="small">Where, Select — методи розширення IEnumerable</p></article><article class="card"><h3>Делегати</h3><p class="small">Func, Action, Predicate — колбеки для фільтрів</p></article><article class="card"><h3>yield</h3><p class="small">Відкладене виконання: елемент з’являється лише коли його просять</p></article></div></section>
-    <section class="slide "><h2>Делегат як точка розширення</h2><pre><code>public delegate List&lt;string&gt; ParseCardNumber(string cardNumber);
+    <section class="slide "><h2>LINQ стоїть на трьох ніжках</h2><div class="cols-3"><article class="card"><h3>Extension methods</h3><p class="small">Усі ці Where та Select — це просто зручні методи розширення для інтерфейсу IEnumerable.</p></article><article class="card"><h3>Делегати</h3><p class="small">Ми передаємо логіку фільтрації прямо в метод, використовуючи делегати на кшталт Func чи Predicate.</p></article><article class="card"><h3>yield</h3><p class="small">Завдяки відкладеному виконанню, наступний елемент колекції обчислюється лише тоді, коли він нам дійсно потрібен.</p></article></div></section>
+    <section class="slide "><h2>Делегат як точка розширення</h2>
+      <p class="lead">Делегати дозволяють передавати функції як параметри. Це ідеальний спосіб дати клієнту можливість підмінити частину вашого алгоритму.</p>
+      <pre><code>public delegate List&lt;string&gt; ParseCardNumber(string cardNumber);
 
 public string Mask(string cardNumber, ParseCardNumber parse = null) {
   var groups = parse != null ? parse(cardNumber) : SplitBy4(cardNumber);
@@ -115,14 +139,14 @@ public string Mask(string cardNumber, ParseCardNumber parse = null) {
 // або Func&lt;string, List&lt;string&gt;&gt;</code></pre></section>
     <section class="slide "><h2>Підсумок</h2>
       <ul>
-        <li>Працюйте через <strong>контракти</strong>, не через конкретні класи</li>
-        <li>Стан ховайте; властивості дають місце для інваріантів</li>
-        <li>Поліморфізм = одна назва, різна поведінка</li>
-        <li>LINQ — не магія, а extensions + делегати + yield</li>
+        <li>Завжди намагайтеся працювати через <strong>контракти</strong> (інтерфейси), а не зав’язуватися на конкретні класи.</li>
+        <li>Ховайте внутрішній стан об’єктів. Використовуйте властивості, щоб гарантувати, що ваші дані завжди валідні.</li>
+        <li>Пам’ятайте, що поліморфізм дозволяє викликати один метод, але отримувати різну поведінку. І все це працює завдяки upcast.</li>
+        <li>LINQ здається магією, але насправді це просто елегантна комбінація extension methods, делегатів та <code>yield</code>.</li>
       </ul></section>
     <section class="slide next-step"><p class="kicker">Після лекції</p><h2>Що далі</h2>
-      <p class="lead">Лабораторні 1 і 2: абстрактні <code>BankAccount</code> і <code>Animal</code>.</p>
-      <p class="note">Почніть з цих двох робіт. Інші лабораторні будуть пізніше.</p></section>
+      <p class="lead">На вас чекають лабораторні 1 і 2, де ви власноруч спроєктуєте абстрактні <code>BankAccount</code> та <code>Animal</code>.</p>
+      <p class="note">А на наступній лекції ми розберемо value type, boxing та generics. Саме тоді ви дізнаєтесь, як насправді працює <code>List&lt;T&gt;</code>, який ми сьогодні використовували.</p></section>
   </div>
   <div class="chrome">
     <span>OOP on top of C# · <b>Теорія ООП</b></span>

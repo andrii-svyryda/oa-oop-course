@@ -9,9 +9,85 @@
 <body>
   <div class="progress"></div>
   <div class="deck">
-    <section class="slide title"><p class="kicker">Лекція 02</p><h1>Узагальнення (generics)</h1><p class="lead">Один алгоритм — багато типів, без кастингу і дублювання коду.</p><div class="pills"><span class="pill">&lt;T&gt;</span><span class="pill">constraints</span><span class="pill">List / Dictionary</span></div></section>
-    <section class="slide "><h2>Навіщо generics</h2><ul><li><strong>Безпека типів</strong> на етапі компіляції</li><li><strong>Продуктивність</strong> — немає boxing / зайвого cast</li><li><strong>Повторне використання</strong> — один код для int, string, своїх класів</li></ul></section>
-    <section class="slide "><h2>Узагальнений метод Swap</h2><pre><code>public static void Swap&lt;T&gt;(ref T one, ref T second) {
+    <section class="slide title"><p class="kicker">Лекція 02</p><h1>Узагальнення (generics)</h1><p class="lead">Згадаємо роботу з типами та їх приведення, щоб зрозуміти, навіщо нам <code>&lt;T&gt;</code>.</p><div class="pills"><span class="pill">value / reference</span><span class="pill">cast</span><span class="pill">boxing</span><span class="pill">&lt;T&gt;</span></div></section>
+    <section class="slide "><h2>План заняття</h2><ul>
+      <li>Згадаємо різницю між value та reference type, щоб ви побачили, звідки береться boxing.</li>
+      <li>Подивимось, як працює приведення типів і що відбувається, коли ви кладете value type в <code>object</code>.</li>
+      <li>Спробуємо колекцію <code>object</code> і побачимо, як легко програма падає в runtime.</li>
+      <li>Розберемо generics: як написати метод чи клас із <code>&lt;T&gt;</code> та як поставити на нього constraints.</li>
+      <li>Колекції сьогодні згадуємо лише як приклад, а яку саме структуру обрати — розберемо на лекції 11.</li>
+    </ul></section>
+    <section class="slide "><h2>Value type і reference type</h2>
+      <div class="grid">
+        <div>
+          <p><strong>Value type</strong> — <code>int</code>, <code>bool</code>, <code>double</code>, <code>struct</code>, <code>enum</code></p>
+          <ul>
+            <li>Значення лежить прямо у вашій змінній.</li>
+            <li>Коли ви щось присвоюєте, дані просто копіюються.</li>
+            <li>Маєте дві змінні — маєте два незалежні числа <code>42</code>.</li>
+          </ul>
+        </div>
+        <div>
+          <p><strong>Reference type</strong> — <code>class</code>, масиви, більшість BCL</p>
+          <ul>
+            <li>Змінна тримає лише вказівник на об’єкт, який живе на heap.</li>
+            <li>Дві змінні можуть дивитися на один і той самий об’єкт.</li>
+            <li><code>string</code> — це теж reference type, але він незмінний.</li>
+          </ul>
+        </div>
+      </div>
+      <p class="note">Ви можете покласти будь-який тип у змінну типу <code>object</code>. Але для value type CLR кладе копію на heap, і це не безкоштовно.</p>
+    </section>
+    <section class="slide "><h2>Приведення типів (cast)</h2>
+      <div class="grid">
+        <div>
+          <ul>
+            <li><strong>Неявне (implicit)</strong> — це безпечне розширення. Компілятор робить це сам, бо ви нічого не втратите.</li>
+            <li><strong>Явне (explicit)</strong> — тут відповідальність на вас. Ви кажете компілятору: «я знаю, що роблю».</li>
+            <li>Upcast та downcast між класами ми вже розібрали на першій лекції.</li>
+            <li>Якщо ви помилилися з типом, програма впаде з <code>InvalidCastException</code>, коли вже працюватиме.</li>
+          </ul>
+        </div>
+        <div><pre><code>long wide = 42;      // неявно: int → long
+int narrow = (int)wide; // явно: можна втратити дані
+
+object box = 10;
+int n = (int)box;    // ок, якщо всередині int
+string s = (string)box; // виняток у runtime</code></pre></div>
+      </div>
+    </section>
+    <section class="slide "><h2>Boxing і unboxing</h2>
+      <div class="grid">
+        <div>
+          <ul>
+            <li><strong>Boxing</strong> — коли ви кладете <code>int</code> в <code>object</code>, на heap з’являється обгортка і туди копіюється значення.</li>
+            <li><strong>Unboxing</strong> — коли ви дістаєте значення назад, вам потрібен точний тип.</li>
+            <li>Запакований <code>int</code> — це не <code>long</code>. Ви не можете дістати його як інший тип.</li>
+          </ul>
+        </div>
+        <div><pre><code>int n = 42;
+object box = n;        // boxing
+int copy = (int)box;   // unboxing
+long fail = (long)box; // InvalidCastException</code></pre></div>
+      </div>
+      <p class="note">Не плутайте це з <code>implicit</code> чи <code>explicit operator</code>. Як писати власні оператори перетворення, ми подивимось на лекції 10.</p>
+    </section>
+    <section class="slide "><h2>Без generics: усе як object</h2>
+      <pre><code>var items = new List&lt;object&gt;(); // раніше — ArrayList
+items.Add(10);      // boxing: int → object
+items.Add("oops");  // компілятор мовчить
+int x = (int)items[0]; // unboxing + cast — ок
+int y = (int)items[1]; // бум: рядок не є int</code></pre>
+      <p class="lead">Компілятор дозволяє вам змішати числа й рядки, а програма падає в runtime. Саме цю проблему вирішують generics.</p>
+    </section>
+    <section class="slide "><h2>Навіщо generics</h2><ul>
+      <li><strong>Безпека типів.</strong> Якщо ви спробуєте покласти рядок у список чисел, компілятор це не пропустить.</li>
+      <li><strong>Продуктивність.</strong> Коли ви створюєте <code>List&lt;int&gt;</code>, він зберігає числа саме як числа, тому ви уникаєте boxing.</li>
+      <li><strong>Повторне використання.</strong> Ви пишете алгоритм один раз, і він працює для <code>int</code>, <code>string</code> чи ваших власних класів.</li>
+    </ul></section>
+    <section class="slide "><h2>Узагальнений метод Swap</h2>
+      <p class="lead">Тут <code>T</code> працює як замінник: коли ви викликаєте метод, компілятор підставляє замість <code>T</code> ваш реальний тип.</p>
+      <pre><code>public static void Swap&lt;T&gt;(ref T one, ref T second) {
   T tmp = one;
   one = second;
   second = tmp;
@@ -19,7 +95,9 @@
 
 Swap&lt;int&gt;(ref a, ref b);
 Swap(ref c, ref d); // компілятор виведе T</code></pre></section>
-    <section class="slide "><h2>Узагальнений клас</h2><pre><code>public class VerySimpleAndNaiveCache&lt;T&gt; {
+    <section class="slide "><h2>Узагальнений клас</h2>
+      <p class="lead">Ви можете зробити весь клас узагальненим, і тоді <code>T</code> буде відомим для всіх його методів та полів.</p>
+      <pre><code>public class VerySimpleAndNaiveCache&lt;T&gt; {
   private Dictionary&lt;string, T&gt; cache = new();
 
   public T GetOrCreate(string key, Func&lt;T&gt; createItem) {
@@ -31,18 +109,33 @@ Swap(ref c, ref d); // компілятор виведе T</code></pre></section
 
 var usersCache = new VerySimpleAndNaiveCache&lt;UserCacheItem&gt;();</code></pre></section>
     <section class="slide "><h2>Обмеження (constraints)</h2>
+      <p class="lead">Компілятор має знати, що ваш <code>T</code> вміє робити. Ви ставите constraint, коли вам потрібна конкретна поведінка.</p>
       <ul>
-        <li><code>where T : struct</code> — value type</li>
-        <li><code>where T : class</code> — reference type</li>
-        <li><code>where T : new()</code> — є конструктор без параметрів</li>
-        <li><code>where T : Enum</code>, <code>notnull</code>, конкретний базовий клас / інтерфейс</li>
+        <li>Пишіть <code>where T : struct</code>, якщо ваш код працює лише з value type.</li>
+        <li>Пишіть <code>where T : class</code>, якщо вам потрібен саме reference type.</li>
+        <li>Додавайте <code>where T : new()</code>, щоб ви могли створити об’єкт через <code>new T()</code>.</li>
+        <li>Ви також можете вимагати, щоб <code>T</code> реалізував певний інтерфейс чи наслідував базовий клас.</li>
       </ul>
-      <pre><code>public static void Swap&lt;T&gt;(ref T a, ref T b) where T : struct</code></pre></section>
-    <section class="slide "><h2>Колекції як головний приклад</h2><ul><li><code>List&lt;T&gt;</code> — індексований динамічний список</li><li><code>Dictionary&lt;TKey,TValue&gt;</code> — пари ключ–значення</li><li><code>Queue&lt;T&gt;</code> FIFO · <code>Stack&lt;T&gt;</code> LIFO</li><li>Делегати <code>Func&lt;&gt;</code> / <code>Action&lt;&gt;</code> теж generic</li></ul></section>
-    <section class="slide "><h2>Підсумок</h2><p class="lead">Якщо бачите copy-paste під int і double — майже завжди потрібен <code>T</code> з правильним constraint.</p></section>
+      <pre><code>public static void Swap&lt;T&gt;(ref T a, ref T b) where T : struct</code></pre>
+    </section>
+    <section class="slide "><h2>Колекції — приклад, не вся тема</h2>
+      <ul>
+        <li>Стандартні колекції є узагальненими, тому <code>List&lt;int&gt;</code> завжди залишатиметься списком чисел і не прийме рядок.</li>
+        <li>Делегати <code>Func</code> та <code>Action</code>, які ви бачили на першій лекції, теж працюють через generics.</li>
+        <li>Сьогодні ми не обираємо між списком, словником чи стеком — про це детально поговоримо на лекції 11.</li>
+      </ul>
+    </section>
+    <section class="slide "><h2>Підсумок</h2>
+      <ul>
+        <li>Коли ви присвоюєте value type, ви копіюєте самі дані. Для reference type ви копіюєте лише посилання.</li>
+        <li>Коли ви кладете value type в <code>object</code>, на heap з’являється обгортка, і це не безкоштовно.</li>
+        <li>Generics дозволяють вам писати безпечний код, який не робить зайвого boxing та не падає в runtime.</li>
+        <li>Якщо ви ловите себе на тому, що копіюєте той самий код для різних типів — час написати метод із <code>T</code>.</li>
+      </ul>
+    </section>
     <section class="slide next-step"><p class="kicker">Після лекції</p><h2>Що далі</h2>
-      <p class="lead">Лабораторна 7: власний generic linked list із підтримкою <code>foreach</code>.</p>
-      <p class="note">Пізніше в курсі — generic <code>Calculator</code> лише для числових типів і unit-тести.</p></section>
+      <p class="lead">На лабораторній 7 ви напишете власний generic список, який підтримуватиме <code>foreach</code>.</p>
+      <p class="note">Як працюють різні колекції, ми розберемо на лекції 11, а як писати власні <code>implicit</code> та <code>explicit</code> перетворення — на лекції 10.</p></section>
   </div>
   <div class="chrome">
     <span>OOP on top of C# · <b>Узагальнення</b></span>
