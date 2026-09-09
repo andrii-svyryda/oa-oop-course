@@ -9,9 +9,9 @@
 <body>
   <div class="progress"></div>
   <div class="deck">
-    <section class="slide title"><p class="kicker">Лекція 03</p><h1>Відносини між об’єктами</h1><p class="lead">Асоціація, агрегація та композиція: як об’єкти володіють одне одним і хто за кого відповідає.</p><div class="pills"><span class="pill">менеджер</span><span class="pill">робітник</span><span class="pill">проєкт</span></div></section>
-    <section class="slide "><h2>Три типи зв’язку</h2><p class="lead">Наскільки об’єкти залежать один від одного?</p><div class="cols-3"><article class="card"><h3>Асоціація</h3><p class="small">Вони просто знають одне про одного, але їхній час життя не зв’язаний. Наприклад, менеджер керує робітниками. Звільнили менеджера — робітники лишаються працювати.</p></article><article class="card"><h3>Агрегація</h3><p class="small">Тут уже є ціле і його частини, але частина може жити окремо. Проєкт закрили — робітник просто переходить на інший, він лишається в компанії.</p></article><article class="card"><h3>Композиція</h3><p class="small">Найжорсткіший зв’язок: частина не існує без цілого. Зруйнували дім — зникла і кімната. У коді це зазвичай private поле, яке створюється прямо всередині власника.</p></article></div></section>
-    <section class="slide "><h2>Як це виглядає в коді</h2><p class="lead">Хто кого створює.</p><pre><code>public class Project {
+    <section class="slide title"><p class="kicker">Лекція 03</p><h1>Відносини між об’єктами</h1><p class="lead">Розбираємося, хто ким володіє — і коли вам краще заховати об’єкт усередині, а не наслідувати його.</p><div class="pills"><span class="pill">асоціація</span><span class="pill">агрегація</span><span class="pill">композиція</span><span class="pill">vs наслідування</span></div></section>
+    <section class="slide "><h2>Три типи зв’язку</h2><p class="lead">Наскільки об’єкти залежать один від одного?</p><div class="cols-3"><article class="card"><h3>Асоціація</h3><p class="small">Вони просто знають одне про одного, але їхній час життя не пов’язаний. Скажімо, менеджер керує робітниками. Звільнили менеджера — робітники продовжують працювати.</p></article><article class="card"><h3>Агрегація</h3><p class="small">Тут ми вже маємо ціле та його частини, але частина може існувати окремо. Проєкт закрили — робітник просто переходить на інший, він лишається в компанії.</p></article><article class="card"><h3>Композиція</h3><p class="small">Найжорсткіший зв’язок: частина не існує без цілого. Зруйнували дім — зникла й кімната. У коді це зазвичай private поле, яке ви створюєте прямо всередині власника.</p></article></div></section>
+    <section class="slide "><h2>Як це виглядає в коді</h2><p class="lead">Погляньте, хто кого створює.</p><pre><code>public class Project {
   public List&lt;Worker&gt; Team { get; } = new(); // агрегація: ми просто додаємо існуючих робітників
 }
 
@@ -23,15 +23,89 @@ public class Company {
     return m;
   }
 }</code></pre></section>
-    <section class="slide "><h2>Як розрізнити їх на іспиті</h2><p class="lead">Кілька простих питань:</p><ul><li>Хто створює об’єкт? Якщо власник робить це сам — у вас підозра на композицію.</li><li>Чи можна передати цю частину в інше ціле? Якщо так — це агрегація або асоціація.</li><li>Як це малювати на UML? Композиція — це зафарбований ромб, а агрегація — порожній.</li></ul></section>
-    <section class="slide "><h2>Місток до DI</h2><p class="lead">Зверніть увагу: якщо об’єкт не створює залежність сам, а отримує її ззовні — ми послаблюємо зв’язок до асоціації. Це ваш перший крок до впровадження залежностей (Dependency Injection).</p></section>
+    <section class="slide "><h2>Як розрізнити їх на іспиті</h2><p class="lead">Ось кілька простих запитань, щоб ви не заплуталися:</p><ul><li>Хто створює об’єкт? Якщо власник робить це сам — скоріш за все, перед вами композиція.</li><li>Чи можете ви передати цю частину в інше ціле? Якщо так — це агрегація або асоціація.</li><li>Як це малювати на UML? Композиція — це зафарбований ромбик, а агрегація — порожній.</li></ul></section>
+    <section class="slide "><h2>is-a чи has-a?</h2>
+      <p class="lead">Наслідування з першої лекції та сьогоднішня композиція — це просто два різні способи перевикористати код.</p>
+      <div class="grid">
+        <div>
+          <p><strong>Наслідування — is-a</strong></p>
+          <ul>
+            <li>Студент <em>є</em> людиною. Квадрат <em>є</em> фігурою.</li>
+            <li>Ваш нащадок отримує весь публічний і захищений API батька — навіть ті методи, які вам зовсім не потрібні.</li>
+            <li>У C# дозволений лише один батьківський клас. Змінили базу — ризикуєте зламати всіх нащадків.</li>
+          </ul>
+        </div>
+        <div>
+          <p><strong>Композиція — has-a</strong></p>
+          <ul>
+            <li>Автомобіль <em>має</em> двигун. Але він сам не є двигуном.</li>
+            <li>Тут ви самі вирішуєте, які методи варто прокинути назовні клієнтам.</li>
+            <li>Ви можете легко замінити частину: підставити інший двигун, інший логер або інакший список усередині.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+    <section class="slide "><h2>Погано: Stack наслідує List</h2>
+      <p class="lead">Стек насправді не є списком. Якщо ви унаслідуєте <code>List&lt;T&gt;</code>, ваш клієнт викличе <code>Insert</code> десь посередині й зламає вам усю логіку LIFO.</p>
+      <pre><code>class InheritedStack&lt;T&gt; : List&lt;T&gt; {
+  public void Push(T item) =&gt; Add(item);
+  public T Pop() { var x = this[^1]; RemoveAt(Count - 1); return x; }
+}
+
+var s = new InheritedStack&lt;int&gt;();
+s.Push(1); s.Push(2);
+s.Insert(0, 99); // стек це дозволяє. Не повинен.</code></pre>
+    </section>
+    <section class="slide "><h2>Добре: Stack тримає List</h2>
+      <p class="lead">Список лишається лише деталлю імплементації. Назовні ви віддаєте тільки <code>Push</code>, <code>Pop</code> та <code>Peek</code>.</p>
+      <pre><code>class ComposedStack&lt;T&gt; {
+  private readonly List&lt;T&gt; _items = new();
+  public void Push(T item) =&gt; _items.Add(item);
+  public T Pop() {
+    var x = _items[^1];
+    _items.RemoveAt(_items.Count - 1);
+    return x;
+  }
+}</code></pre>
+    </section>
+    <section class="slide "><h2>Плюси й мінуси</h2>
+      <div class="grid">
+        <div>
+          <p><strong>Наслідування</strong></p>
+          <ul>
+            <li class="good">Поліморфізм працює «з коробки»: ви робите колекцію <code>Shape</code> і кладете туди різні фігури.</li>
+            <li class="good">Ви пишете менше коду, якщо правило is-a дійсно виконується.</li>
+            <li class="bad">Крихкий базовий клас: одна правка батька може вдарити по всіх нащадках.</li>
+            <li class="bad">Ви тягнете за собою зайвий API. У вас лише один батько, і нащадка важче тестувати ізольовано.</li>
+          </ul>
+        </div>
+        <div>
+          <p><strong>Композиція</strong></p>
+          <ul>
+            <li class="good">Ви повністю контролюєте публічну поверхню. Легко підмінити деталь і плавно дійти до DI.</li>
+            <li class="good">Ви можете зібрати докупи кілька поведінок і без множинного наслідування.</li>
+            <li class="bad">Доведеться писати трохи більше коду, адже вам потрібно делегувати виклики методів.</li>
+            <li class="bad">Сама по собі вона не дає поліморфізму — для цього вам знадобиться спільний контракт.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+    <section class="slide "><h2>Коли що брати</h2>
+      <ul>
+        <li>Наслідуйте, лише якщо ваш нащадок дійсно <strong>є</strong> батьком у будь-яких сценаріях, і ви готові прийняти весь його API. Трохи згодом це формалізує LSP на четвертій лекції.</li>
+        <li>Композиція — це ваш типовий вибір за замовчуванням: «я використовую», а не «я є». Авто <em>має</em> двигун, стек <em>має</em> список.</li>
+        <li>Якщо сумніваєтесь — завжди починайте з композиції. Наслідування потім буде дуже важко вичистити з коду.</li>
+      </ul>
+    </section>
+    <section class="slide "><h2>Місток до DI</h2><p class="lead">Зверніть увагу: якщо ваш об’єкт не створює залежність сам, а отримує її ззовні — ви послаблюєте зв’язок до асоціації. Це ваш перший крок до впровадження залежностей (DI).</p></section>
     <section class="slide "><h2>Що почитати</h2><ul>
       <li><a href="https://www.c-sharpcorner.com/article/difference-between-composition-and-aggregation/">Composition vs Aggregation</a></li>
       <li><a href="https://stackoverflow.com/questions/12604031/c-sharp-code-for-association-aggregation-composition">SO: association / aggregation / composition</a></li>
+      <li><a href="https://en.wikipedia.org/wiki/Composition_over_inheritance">Composition over inheritance</a></li>
     </ul></section>
     <section class="slide next-step"><p class="kicker">Після лекції</p><h2>Що далі</h2>
-      <p class="lead">Далі — SOLID: п’ять правил, які роблять такі зв’язки придатними до змін.</p>
-      <p class="note">До речі, <code>List&lt;T&gt;</code> у коді — це вже знайомий вам матеріал з лекції 02. Нових колекцій сьогодні немає.</p></section>
+      <p class="lead">Наступна зупинка — SOLID. Принцип LSP якраз і перевірить, чи ваше is-a вам не бреше.</p>
+      <p class="note">До речі, <code>List&lt;T&gt;</code> з наших прикладів ми розбирали на другій лекції. А патерн Декоратор на лекції 07 знову покаже композицію в дії: там обгортка <em>має</em> внутрішній об’єкт.</p></section>
   </div>
   <div class="chrome">
     <span>OOP on top of C# · <b>Відносини між об’єктами</b></span>

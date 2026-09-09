@@ -26,6 +26,11 @@ public static class SwapDemo
         Swap(ref c, ref d);
         Console.WriteLine($"float: c={c}, d={d}");
 
+        var name = "Ann";
+        var other = "Bob";
+        Swap(ref name, ref other);
+        Console.WriteLine($"string: name={name}, other={other}");
+
         var x = 10;
         var y = 20;
         SwapStruct(ref x, ref y);

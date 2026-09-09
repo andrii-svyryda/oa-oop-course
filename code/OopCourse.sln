@@ -7,6 +7,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lecture01-OopTheory", "lect
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lecture02-Generics", "lecture-02-generics\Lecture02-Generics.csproj", "{A3DDB093-E49D-4F71-A37C-86B106B0DD7A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lecture03-ObjectRelationships", "lecture-03-object-relationships\Lecture03-ObjectRelationships.csproj", "{C7A1E8D2-4B3F-4A91-9E12-8F6D2C1B0A47}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lecture04-Solid", "lecture-04-solid\Lecture04-Solid.csproj", "{D8B2F9E3-5C40-4B02-8F23-9A7E3D2C1B58}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +28,13 @@ Global
 		{A3DDB093-E49D-4F71-A37C-86B106B0DD7A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A3DDB093-E49D-4F71-A37C-86B106B0DD7A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A3DDB093-E49D-4F71-A37C-86B106B0DD7A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C7A1E8D2-4B3F-4A91-9E12-8F6D2C1B0A47}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C7A1E8D2-4B3F-4A91-9E12-8F6D2C1B0A47}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C7A1E8D2-4B3F-4A91-9E12-8F6D2C1B0A47}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C7A1E8D2-4B3F-4A91-9E12-8F6D2C1B0A47}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D8B2F9E3-5C40-4B02-8F23-9A7E3D2C1B58}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D8B2F9E3-5C40-4B02-8F23-9A7E3D2C1B58}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D8B2F9E3-5C40-4B02-8F23-9A7E3D2C1B58}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D8B2F9E3-5C40-4B02-8F23-9A7E3D2C1B58}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

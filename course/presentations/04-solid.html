@@ -28,7 +28,9 @@ public class DiscountCalculator {
   public DiscountCalculator(IDiscountStrategy s) =&gt; _s = s;
   public double CalculateDiscount(double price) =&gt; _s.CalculateDiscount(price);
 }</code></pre></section>
-    <section class="slide "><h2>LSP: Orange не є Apple</h2><div class="grid"><div><p class="bad">Порушення: Orange : Apple і GetColor() бреше про яблуко.</p><pre><code>Apple apple = new Orange();
+    <section class="slide "><h2>LSP: Orange не є Apple</h2>
+      <p class="note">Це і є той самий формальний тест на is-a з третьої лекції. Якщо ваш нащадок відверто бреше про батька — наслідувати не можна, краще візьміть спільний контракт або застосуйте композицію.</p>
+      <div class="grid"><div><p class="bad">Порушення: Orange : Apple і GetColor() бреше про яблуко.</p><pre><code>Apple apple = new Orange();
 Console.WriteLine(apple.GetColor());</code></pre></div><div><p class="good">Виправлення: спільний контракт IFruit.</p><pre><code>IFruit fruit = new Orange();
 fruit = new Apple();</code></pre></div></div></section>
     <section class="slide "><h2>ISP: робот не їсть</h2><div class="grid"><div><pre><code>interface IWorker {

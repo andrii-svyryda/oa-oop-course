@@ -15,28 +15,44 @@
       <li>Подивимось, як працює приведення типів і що відбувається, коли ви кладете value type в <code>object</code>.</li>
       <li>Спробуємо колекцію <code>object</code> і побачимо, як легко програма падає в runtime.</li>
       <li>Розберемо generics: як написати метод чи клас із <code>&lt;T&gt;</code> та як поставити на нього constraints.</li>
-      <li>Колекції сьогодні згадуємо лише як приклад, а яку саме структуру обрати — розберемо на лекції 11.</li>
+      <li>Сьогодні колекції — лише приклад використання <code>&lt;T&gt;</code>, а коли саме брати List, Dictionary чи Stack/Queue (доступ за індексом, ключем чи LIFO/FIFO) — розберемо на лекції 11.</li>
     </ul></section>
     <section class="slide "><h2>Value type і reference type</h2>
+      <p class="lead"><code>int</code> лежить прямо у змінній. А змінна класу лише вказує на об’єкт, який живе на heap.</p>
       <div class="grid">
         <div>
-          <p><strong>Value type</strong> — <code>int</code>, <code>bool</code>, <code>double</code>, <code>struct</code>, <code>enum</code></p>
-          <ul>
-            <li>Значення лежить прямо у вашій змінній.</li>
-            <li>Коли ви щось присвоюєте, дані просто копіюються.</li>
-            <li>Маєте дві змінні — маєте два незалежні числа <code>42</code>.</li>
-          </ul>
+          <p><strong>Value type</strong> — <code>int</code>, <code>struct</code>, <code>enum</code></p>
+          <pre><code>int a = 42;
+int b = a;</code></pre>
+          <div class="mem" aria-label="value type in memory">
+            <div class="mem-lane">стек</div>
+            <div class="mem-row">
+              <span class="mem-cell">a = 42</span>
+              <span class="mem-cell">b = 42</span>
+            </div>
+            <div class="mem-lane">heap</div>
+            <div class="mem-row"><span class="note">порожньо: числа сюди не йдуть</span></div>
+          </div>
+          <p class="small">Ви копіюєте самі дані. Тепер у вас дві незалежні <code>42</code>.</p>
         </div>
         <div>
-          <p><strong>Reference type</strong> — <code>class</code>, масиви, більшість BCL</p>
-          <ul>
-            <li>Змінна тримає лише вказівник на об’єкт, який живе на heap.</li>
-            <li>Дві змінні можуть дивитися на один і той самий об’єкт.</li>
-            <li><code>string</code> — це теж reference type, але він незмінний.</li>
-          </ul>
+          <p><strong>Reference type</strong> — <code>class</code>, масиви</p>
+          <pre><code>var p = new User("Ann");
+var q = p;</code></pre>
+          <div class="mem" aria-label="reference type in memory">
+            <div class="mem-lane">стек</div>
+            <div class="mem-row">
+              <span class="mem-cell">p</span>
+              <span class="mem-cell">q</span>
+              <span class="mem-arrow">обидва →</span>
+            </div>
+            <div class="mem-lane">heap</div>
+            <div class="mem-row"><span class="mem-obj">User { Name = Ann }</span></div>
+          </div>
+          <p class="small">Ви копіюєте лише посилання. Тепер дві змінні дивляться на один об’єкт.</p>
         </div>
       </div>
-      <p class="note">Ви можете покласти будь-який тип у змінну типу <code>object</code>. Але для value type CLR кладе копію на heap, і це не безкоштовно.</p>
+      <p class="note"><code>string</code> — теж reference type, але він незмінний. Якщо ви кладете value type в <code>object</code>, його копія з’являється на heap. Це і є boxing.</p>
     </section>
     <section class="slide "><h2>Приведення типів (cast)</h2>
       <div class="grid">
@@ -122,7 +138,7 @@ var usersCache = new VerySimpleAndNaiveCache&lt;UserCacheItem&gt;();</code></pre
       <ul>
         <li>Стандартні колекції є узагальненими, тому <code>List&lt;int&gt;</code> завжди залишатиметься списком чисел і не прийме рядок.</li>
         <li>Делегати <code>Func</code> та <code>Action</code>, які ви бачили на першій лекції, теж працюють через generics.</li>
-        <li>Сьогодні ми не обираємо між списком, словником чи стеком — про це детально поговоримо на лекції 11.</li>
+        <li>Сьогодні не розбираємо, коли брати List, Dictionary чи Stack — це лекція 11: індекс, ключ або LIFO / FIFO.</li>
       </ul>
     </section>
     <section class="slide "><h2>Підсумок</h2>
@@ -135,7 +151,7 @@ var usersCache = new VerySimpleAndNaiveCache&lt;UserCacheItem&gt;();</code></pre
     </section>
     <section class="slide next-step"><p class="kicker">Після лекції</p><h2>Що далі</h2>
       <p class="lead">На лабораторній 7 ви напишете власний generic список, який підтримуватиме <code>foreach</code>.</p>
-      <p class="note">Як працюють різні колекції, ми розберемо на лекції 11, а як писати власні <code>implicit</code> та <code>explicit</code> перетворення — на лекції 10.</p></section>
+      <p class="note">Коли обирати List, Dictionary чи Stack/Queue (залежно від потреби в індексі, ключі чи LIFO/FIFO), ми розберемо на лекції 11, а як писати власні <code>implicit</code> та <code>explicit</code> перетворення — на лекції 10.</p></section>
   </div>
   <div class="chrome">
     <span>OOP on top of C# · <b>Узагальнення</b></span>

@@ -1,6 +1,6 @@
 # Runnable lecture examples
 
-Console apps with code from lectures 01 and 02.
+Console apps with code from the lecture slides. Run one project and walk the sections as you go through the deck.
 
 ## Requirements
 
@@ -11,11 +11,10 @@ Console apps with code from lectures 01 and 02.
 ```powershell
 cd code
 
-# Lecture 01 — OOP theory
 dotnet run --project lecture-01-oop-theory
-
-# Lecture 02 — Generics
 dotnet run --project lecture-02-generics
+dotnet run --project lecture-03-object-relationships
+dotnet run --project lecture-04-solid
 ```
 
 Or build the whole solution:

@@ -153,6 +153,51 @@ img.fig {
 .cols-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
 .small { font-size: 1.05rem; }
 
+.mem {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.55rem 0.9rem;
+  align-items: center;
+  margin-top: 0.7rem;
+  font-family: "Cascadia Code", "Consolas", "Fira Code", monospace;
+  font-size: clamp(0.78rem, 1.15vw, 0.98rem);
+}
+
+.mem-lane {
+  color: var(--muted);
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.mem-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  align-items: center;
+}
+
+.mem-cell, .mem-obj {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 0.35rem 0.65rem;
+  box-shadow: var(--shadow);
+}
+
+.mem-obj {
+  border-color: rgba(15, 122, 114, 0.35);
+  background: rgba(15, 122, 114, 0.08);
+}
+
+.mem-arrow {
+  color: var(--accent-2);
+  font-weight: 700;
+}
+
+.overview-on .mem { display: none; }
+
 a { color: var(--accent-2); }
 
 .overview-on { overflow: auto; }
