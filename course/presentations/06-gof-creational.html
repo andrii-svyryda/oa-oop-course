@@ -9,56 +9,190 @@
 <body>
   <div class="progress"></div>
   <div class="deck">
-    <section class="slide title"><p class="kicker">Лекція 06</p><h1>Породжувальні патерни GoF</h1><p class="lead">Гнучке створення об’єктів без розкиданих new і зайвих залежностей.</p><div class="pills"><span class="pill">Factory</span><span class="pill">Abstract Factory</span><span class="pill">Builder</span><span class="pill">Singleton</span></div></section>
-    <section class="slide "><h2>Патерн ≠ алгоритм</h2><ul><li>Алгоритм — чіткі кроки (рецепт)</li><li>Патерн — креслення рішення; код щоразу підлаштовують</li><li>GoF («банда чотирьох»): породжувальні, структурні, поведінкові</li></ul></section>
-    <section class="slide "><h2>Три сім’ї GoF</h2><div class="cols-3"><article class="card"><h3>Породжувальні</h3><p class="small">Як створювати об’єкти, не прив’язуючись до конкретних класів.</p></article><article class="card"><h3>Структурні</h3><p class="small">Як складати об’єкти в більші структури.</p></article><article class="card"><h3>Поведінкові</h3><p class="small">Як об’єкти спілкуються і розподіляють обов’язки.</p></article></div></section>
-    <section class="slide "><h2>Абстрактна фабрика</h2><div class="grid"><div><img class="fig" src="../lectures/assets/06-gof-creational/Untitled.png" alt="abstract factory">
-        <p class="small">Сім’ї сумісних продуктів без вказання конкретних класів.</p></div><div><pre><code>interface ICommunicationBaseFactory {
-  IBluetoothCommFactory InitializeBluetoothCommunication();
-  IWifiCommFactory InitializeWiFiCommnucation();
-}
-// клієнт знає лише абстракції,
-// конкретну фабрику йому передають</code></pre></div></div></section>
-    <section class="slide "><h2>Фабричний метод</h2>
-      <p class="lead">Виносимо <code>new</code> у перевизначуваний метод підкласу.</p>
+    <section class="slide title"><p class="kicker">Лекція 06</p><h1>Породжувальні патерни GoF</h1><p class="lead">Сьогодні ми розберемося, як створювати об’єкти, не розкидаючи <code>new</code> по всьому коду і не прив’язуючи клієнта до конкретних класів.</p><div class="pills"><span class="pill">Factory Method</span><span class="pill">Abstract Factory</span><span class="pill">Builder</span><span class="pill">Singleton</span></div></section>
+    <section class="slide "><h2>Що таке патерн</h2>
       <ul>
-        <li>Клієнт залежить від абстракції продукту</li>
-        <li>У .NET поруч: <code>DbProviderFactory</code>, <code>LoggerFactory</code>, <code>Activator.CreateInstance</code></li>
-        <li>Детальніше — лекція про вбудовані шаблони C#</li>
-      </ul></section>
-    <section class="slide "><h2>Одинак — і чому «проста» версія небезпечна</h2><div class="grid"><div><ul>
-          <li>Один екземпляр + глобальна точка доступу</li>
-          <li>Зазвичай lazy, без параметрів конструктора</li>
-          <li class="bad">Код справа — не thread-safe</li>
-          <li class="good">Краще <code>Lazy&lt;T&gt;</code> або контейнер Singleton</li>
-        </ul></div><div><pre><code>public sealed class Singleton {
-  private static Singleton instance;
-  private Singleton() {}
-  public static Singleton Instance {
+        <li>Алгоритм каже точно, що робити: зробіть так — отримаєте ось це.</li>
+        <li>Патерн лише називає типову проблему і спосіб її розв’язати. Код щоразу пишете свій, ідея лишається та сама.</li>
+        <li>Автори GoF («банда чотирьох») поділили патерни на три сім’ї. Сьогодні — породжувальні, далі структурні й поведінкові.</li>
+      </ul>
+    </section>
+    <section class="slide "><h2>Три сім’ї патернів</h2>
+      <div class="cols-3">
+        <article class="card"><h3>Породжувальні</h3><p class="small">Вони відповідають за те, хто і як створює об’єкт. Завдяки їм клієнтський код не пише <code>new Concrete</code>.</p></article>
+        <article class="card"><h3>Структурні</h3><p class="small">Вони показують, як скласти класи разом: через обгортку, фасад або дерево. Ми розглянемо їх на лекції 07.</p></article>
+        <article class="card"><h3>Поведінкові</h3><p class="small">Вони описують алгоритми та способи ефективної комунікації між об'єктами. Завдяки їм можна гнучко розподіляти обов'язки та керувати складними потоками виконання. Цю тему ми детально розберемо на лекції 08.</p></article>
+      </div>
+    </section>
+    <section class="slide "><h2>Три «фабрики»: не плутайте їх між собою</h2>
+      <div class="cols-3">
+        <article class="card"><h3>Проста фабрика</h3><p class="small">Звичайний метод зі <code>switch</code>. Це не патерн GoF, а просто спосіб заховати виклик <code>new</code>.</p></article>
+        <article class="card"><h3>Фабричний метод</h3><p class="small">Патерн GoF, у якому виклик <code>new</code> відбувається в перевизначуваному методі класу-нащадка.</p></article>
+        <article class="card"><h3>Абстрактна фабрика</h3><p class="small">Патерн GoF, де фабрика створює цілу сім’ю сумісних продуктів (наприклад, кнопку та вікно однієї теми).</p></article>
+      </div>
+    </section>
+    <section class="slide "><h2>Проста фабрика <span style="color: var(--muted); font-weight: normal; font-size: 0.8em;">(Simple Factory)</span></h2>
+      <p class="lead">Тут клієнт просто каже «дай email» і не знає конкретного класу. Але якщо ви додасте новий канал, вам доведеться правити цей метод — згадайте проблему зі <code>switch</code> у принципі OCP.</p>
+      <div class="grid">
+        <div>
+          <pre><code>static class NotifierFactory {
+  public static INotifier Create(string channel) =&gt; channel switch {
+    "email" =&gt; new EmailNotifier(),
+    "sms"   =&gt; new SmsNotifier(),
+    _ =&gt; throw new ArgumentOutOfRangeException()
+  };
+}</code></pre>
+        </div>
+        <div>
+          <ul class="small">
+            <li class="good"><strong>Використовуйте, коли:</strong> логіка створення об'єктів проста, ізольована і дуже рідко змінюється.</li>
+            <li class="bad"><strong>Уникайте, коли:</strong> система постійно розширюється новими типами продуктів. У такому випадку щоразу доведеться відкривати цей клас і дописувати нові гілки у <code>switch</code>, що грубо порушує принцип OCP (Open-Closed Principle). Це робить клас крихким і ускладнює підтримку. <strong>Альтернатива:</strong> Фабричний метод (якщо створення складне) або реєстрація в DI-контейнері, який сам підбере потрібну реалізацію.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+    <section class="slide "><h2>Фабричний метод <span style="color: var(--muted); font-weight: normal; font-size: 0.8em;">(Factory Method)</span></h2>
+      <p class="lead">У цьому патерні базовий клас описує загальний сценарій, а вже його нащадок вирішує, <em>який саме</em> продукт потрібно створити.</p>
+      <div class="grid">
+        <div>
+          <pre><code>abstract class Dialog {
+  public abstract IButton CreateButton();
+  public void Render() =&gt; CreateButton().Draw();
+}
+class WinDialog : Dialog {
+  public override IButton CreateButton() =&gt; new WinButton();
+}</code></pre>
+        </div>
+        <div>
+          <ul class="small">
+            <li class="good"><strong>Використовуйте, коли:</strong> клас не знає заздалегідь, які конкретно об'єкти йому знадобляться, і делегує це нащадкам.</li>
+            <li class="bad"><strong>Уникайте, коли:</strong> базовий клас фабрики не містить ніякої іншої бізнес-логіки, окрім самого методу <code>Create()</code>. У такому разі для кожного нового продукту (наприклад, <code>PdfReport</code>) вам доведеться створювати окремий клас-фабрику (<code>PdfReportFactory</code>), яка просто робить <code>new</code>. Це створює "паралельні ієрархії" та засмічує проєкт десятками порожніх класів. <strong>Альтернатива:</strong> Проста фабрика (для тривіального створення) або DI-контейнер.</li>
+          </ul>
+        </div>
+      </div>
+      <p class="note">У .NET ви часто зустрінете схожі підходи: <code>LoggerFactory</code>, <code>DbProviderFactory</code>.</p>
+    </section>
+    <section class="slide "><h2>Коли вистачить простої фабрики</h2>
+      <p class="lead">Якщо треба лише обрати клас — один <code>switch</code> дешевший за ієрархію порожніх фабрик.</p>
+      <pre><code>static class ReportFactory {
+  public static IReport Create(string type) =&gt; type switch {
+    "pdf"   =&gt; new PdfReport(),
+    "excel" =&gt; new ExcelReport(),
+    "html"  =&gt; new HtmlReport(),
+    _ =&gt; throw new ArgumentOutOfRangeException()
+  };
+}</code></pre>
+      <p class="note">Так, новий формат змусить правити цей метод — це б’є OCP. Але один <code>switch</code> тримати легше, ніж десяток класів, у яких лише <code>Create()</code>.</p>
+    </section>
+    <section class="slide "><h2>Або взагалі DI</h2>
+      <p class="lead">Якщо мета — щоб клієнт залежав від <code>IReport</code>, а не від <code>new PdfReport()</code>, контейнер уже вміє бути фабрикою. Це лекція 05.</p>
+      <pre><code>services.AddTransient&lt;IReport, PdfReport&gt;();
+services.AddTransient&lt;ReportMailer&gt;();
+
+class ReportMailer {
+  private readonly IReport _report;
+  public ReportMailer(IReport report) =&gt; _report = report;
+  public void Send() =&gt; _report.Save();
+}</code></pre>
+      <p class="note">Окремий <code>ReportFactory</code> тоді не пишете. Клієнт отримує залежність у конструкторі.</p>
+    </section>
+    <section class="slide "><h2>Коли фабричний метод справді потрібен</h2>
+      <p class="lead">Лише якщо базовий клас має сценарій, а <code>Create()</code> — маленький гачок у ньому. Часто поруч із шаблонним методом.</p>
+      <pre><code>abstract class ReportExporter {
+  public string Export() {
+    var report = Create();
+    report.Build();
+    return report.Save();
+  }
+  protected abstract IReport Create();
+}
+class PdfExporter : ReportExporter {
+  protected override IReport Create() =&gt; new PdfReport();
+}</code></pre>
+      <p class="note">Якщо в базовому класі лише <code>Create()</code> і більше нічого — ієрархію ви роздули даремно. Беріть просту фабрику або DI.</p>
+    </section>
+    <section class="slide "><h2>Абстрактна фабрика <span style="color: var(--muted); font-weight: normal; font-size: 0.8em;">(Abstract Factory)</span></h2>
+      <div class="grid">
+        <div>
+          <img class="fig" src="../lectures/assets/06-gof-creational/Untitled.png" alt="abstract factory">
+          <p class="small">Тут діє правило: одна фабрика створює одну сім’ю об’єктів.</p>
+          <ul class="small">
+            <li class="good"><strong>Коли:</strong> треба створювати сім'ї пов'язаних продуктів (Win-кнопка з Win-вікном).</li>
+            <li class="bad"><strong>Уникайте, коли:</strong> ви знаєте, що склад вашої "сім'ї" продуктів буде розширюватись. Якщо до <code>IUiFactory</code> доведеться додати <code>CreateRadioButton()</code>, вам доведеться відкривати та змінювати абсолютно всі наявні конкретні фабрики (Win, Mac, Linux). Це класичний "ефект дробовика", який ламає OCP та може зламати публічні API. Патерн ідеальний лише тоді, коли склад сім'ї фіксований, а от нові стилі (теми) додаються часто. <strong>Альтернатива:</strong> Фабричний метод.</li>
+          </ul>
+        </div>
+        <div><pre><code>interface IUiFactory {
+  IButton CreateButton();
+  ICheckbox CreateCheckbox();
+}
+class WinFactory : IUiFactory { /* Win* */ }
+class MacFactory : IUiFactory { /* Mac* */ }
+
+void Paint(IUiFactory ui) {
+  ui.CreateButton().Draw();
+  ui.CreateCheckbox().Draw();
+}</code></pre></div>
+      </div>
+    </section>
+    <section class="slide "><h2>Одинак <span style="color: var(--muted); font-weight: normal; font-size: 0.8em;">(Singleton)</span></h2>
+      <div class="grid">
+        <div>
+          <ul class="small">
+            <li>Гарантує, що існує лише один екземпляр класу, і надає глобальну точку доступу.</li>
+            <li class="good"><strong>Використовуйте, коли:</strong> справді потрібен єдиний спільний ресурс (наприклад, пул з'єднань). У проєктах краще реєструйте через <code>AddSingleton</code>.</li>
+            <li class="bad"><strong>Уникайте майже завжди.</strong> Класичний Одинак вважається антипатерном у сучасному світі. Він створює приховані глобальні залежності: клас просто викликає <code>AppCache.Instance</code> десь у глибині свого коду. Через це неможливо підмінити реалізацію моком під час юніт-тестування. Крім того, наївна реалізація часто страждає від проблем із багатопоточністю. <strong>Альтернатива:</strong> Впровадження залежностей (DI) — реєструйте об'єкт як <code>AddSingleton</code>.</li>
+          </ul>
+        </div>
+        <div><pre><code>public sealed class AppCache {
+  private static AppCache? instance;
+  private AppCache() {}
+  public static AppCache Instance {
     get {
       if (instance == null)
-        instance = new Singleton();
+        instance = new AppCache();
       return instance;
     }
   }
-}</code></pre></div></div></section>
-    <section class="slide "><h2>Будівельник</h2><div class="grid"><div><img class="fig" src="../lectures/assets/06-gof-creational/Untitled 1.png" alt="builder">
-        <ul class="small">
-          <li>Director, Builder, ConcreteBuilder, Product</li>
-          <li>Той самий процес — різні представлення</li>
-          <li>Fluent API: кроки ланцюжком</li>
-        </ul></div><div><pre><code>HttpResponseMessage response = await HttpRetryBuilder
-  .Create()
-  .WithMaxRetries(3)
-  .WithRetryDelay(TimeSpan.FromSeconds(2))
-  .WithRequest(MakeHttpRequest)
-  .ExecuteAsync();</code></pre></div></div></section>
-    <section class="slide next-step"><p class="kicker">Після лекції</p><h2>Що далі</h2>
-      <p class="lead"><code>SqlBuilder</code>: fluent вибірка й сортування під PostgreSQL і MS SQL.</p>
-      <pre><code>SqlBuilder.Select&lt;User&gt;()
+}</code></pre></div>
+      </div>
+    </section>
+    <section class="slide "><h2>Будівельник <span style="color: var(--muted); font-weight: normal; font-size: 0.8em;">(Builder)</span></h2>
+      <div class="grid">
+        <div>
+          <img class="fig" src="../lectures/assets/06-gof-creational/Untitled 1.png" alt="builder">
+          <ul class="small">
+            <li>Це основа для fluent API: <code>WithX().WithY().Build()</code>.</li>
+            <li class="good"><strong>Використовуйте, коли:</strong> об'єкт має багато опціональних параметрів або складний поетапний процес збірки.</li>
+            <li class="bad"><strong>Уникайте, коли:</strong> об'єкт можна створити за допомогою простого конструктора з кількома параметрами. Створення окремого класу-будівельника, інтерфейсів до нього та класу-директора невиправдано ускладнює дизайн для простих задач. У C# часто достатньо використати <code>new Object { Prop = ... }</code> (Object Initializer) або параметри за замовчуванням. <strong>Альтернатива:</strong> Object Initializer або Фабричний метод.</li>
+          </ul>
+        </div>
+        <div><pre><code>var sql = SqlBuilder.Select&lt;User&gt;()
   .OrderBy(_ =&gt; _.RegistrationDate)
-  .Take(10);
-// CommandText + CommandParameters</code></pre></section>
+  .Take(10)
+  .Build();
+// CommandText + параметри
+// інший «будівельник» — під PostgreSQL чи MS SQL</code></pre></div>
+      </div>
+    </section>
+    <section class="slide "><h2>Прототип <span style="color: var(--muted); font-weight: normal; font-size: 0.8em;">(Prototype)</span>: короткий огляд</h2>
+      <p class="lead">Цей патерн дозволяє скопіювати вже зібраний об’єкт. У C# для цього існують <code>ICloneable</code> та <code>MemberwiseClone</code>.</p>
+      <ul class="small">
+        <li class="good"><strong>Коли:</strong> створення об'єкта "з нуля" дуже важке, дешевше скопіювати існуючий.</li>
+        <li class="bad"><strong>Уникайте, коли:</strong> об'єкт містить багато вкладених об'єктів або складні кільцеві посилання. Стандартний <code>MemberwiseClone()</code> робить лише поверхневу копію (shallow copy), що призведе до несподіваного спільного доступу до вкладених даних між оригіналом і клоном. Написання ж надійної глибокої копії вручну часто перетворюється на нескінченну боротьбу з багами. <strong>Альтернатива:</strong> Фабричний метод для створення з нуля.</li>
+      </ul>
+      <p class="note">Деталі про поверхневе та глибоке копіювання ми розберемо на лекції 09.</p>
+    </section>
+    <section class="slide "><h2>Коли який патерн обирати</h2>
+      <ul>
+        <li>Треба лише обрати тип — проста фабрика або DI. Фабричний метод — лише коли базовий клас ще й веде сценарій (<code>Export</code>, <code>Render</code>).</li>
+        <li>Якщо ви маєте кілька продуктів, які обов’язково мають підходити одне до одного, вам потрібна абстрактна фабрика.</li>
+        <li>Якщо об’єкт має багато опцій і ви збираєте його покроково, використовуйте будівельник.</li>
+        <li>Якщо вам справді потрібен лише один екземпляр на весь процес, реєструйте Singleton у контейнері, а не пишіть власний <code>Instance</code>.</li>
+      </ul>
+    </section>
+    <section class="slide next-step"><p class="kicker">Після лекції</p><h2>Що далі</h2>
+      <p class="lead">На лабораторній роботі ви реалізуєте <code>SqlBuilder</code> — напишете fluent-інтерфейс для вибірки й сортування даних під PostgreSQL та MS SQL.</p>
+      <p class="note">На наступній лекції ми перейдемо до структурних патернів: ви дізнаєтеся про обгортки й фасади, які допомагають поєднувати класи, а не створювати їх.</p></section>
   </div>
   <div class="chrome">
     <span>OOP on top of C# · <b>GoF: породжувальні</b></span>

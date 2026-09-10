@@ -9,33 +9,151 @@
 <body>
   <div class="progress"></div>
   <div class="deck">
-    <section class="slide title"><p class="kicker">Лекція 08</p><h1>Поведінкові патерни GoF</h1><p class="lead">Хто кого повідомляє, хто виконує команду, хто обирає алгоритм.</p><div class="pills"><span class="pill">Observer</span><span class="pill">Command</span><span class="pill">Strategy</span><span class="pill">Mediator</span></div></section>
-    <section class="slide "><h2>Observer / оглядач</h2><div class="grid"><div><img class="fig" src="../lectures/assets/08-gof-behavioral/Untitled.png" alt="observer">
-        <p class="small">Один-до-багатьох: зміна суб’єкта → усі підписники Update.</p></div><div><pre><code>interface IObserver {
+    <section class="slide title"><p class="kicker">Лекція 08</p><h1>Поведінкові патерни GoF</h1><p class="lead">Як уже створені об’єкти взаємодіють між собою.</p><div class="pills"><span class="pill">Observer</span><span class="pill">Command</span><span class="pill">Strategy</span><span class="pill">State</span><span class="pill">Template Method</span><span class="pill">Mediator</span></div></section>
+    <section class="slide "><h2>Взаємодія, не збірка</h2>
+      <p class="lead">Структурні патерни складали об’єкти. Тут вони вже є — тепер треба розподілити між ними обов’язки.</p>
+    </section>
+    <section class="slide "><h2>Спостерігач <span style="color: var(--muted); font-weight: normal; font-size: 0.8em;">(Observer)</span></h2>
+      <div class="grid">
+        <div>
+          <img class="fig" src="../lectures/assets/08-gof-behavioral/Untitled.png" alt="observer">
+          <ul class="small">
+            <li class="good"><strong>Коли:</strong> зміна одного об'єкта вимагає оновлення інших, і ви не знаєте заздалегідь, скільки їх буде.</li>
+            <li class="bad"><strong>Уникайте, коли:</strong> у вас є складна ланцюгова логіка підписок, що може призвести до нескінченних циклів. Також класичний Спостерігач часто спричиняє витоки пам'яті (memory leaks): суб'єкт міцно тримає посилання на підписника, і якщо ви забудете відписатися, Garbage Collector не зможе видалити його з пам'яті. <strong>Альтернатива:</strong> Медіатор або брокери повідомлень (Message Queues).</li>
+          </ul>
+        </div>
+        <div><pre><code>interface IObserver {
   void Update(Product product);
 }
 interface ISubject {
-  void RegisterObserver(IObserver o);
-  void RemoveObserver(IObserver o);
-  void NotifyObservers(Product p);
-}</code></pre></div></div></section>
-    <section class="slide "><h2>Де живе в .NET</h2><ul><li><code>event</code> — класичний спостерігач мови</li><li><code>IObservable&lt;T&gt;</code> / Rx</li><li>Типовий чат: новий користувач → нотифікації (можна вимкнути)</li></ul></section>
-    <section class="slide "><h2>Команда</h2>
-      <p class="lead">Запит як об’єкт: можна ставити в чергу, скасовувати, логувати.</p>
+  void Register(IObserver o);
+  void Remove(IObserver o);
+  void Notify(Product p);
+}</code></pre></div>
+      </div>
+    </section>
+    <section class="slide "><h2>Спостерігач у житті й у .NET</h2>
       <ul>
-        <li>Invoker знає лише <code>ICommand.Execute()</code></li>
-        <li>Конкретна команда тримає receiver і параметри</li>
-        <li>Близько до MediatR: IRequest / IRequestHandler</li>
-      </ul></section>
-    <section class="slide "><h2>Стратегія</h2><div class="grid"><div><p>Сімейство алгоритмів за спільним інтерфейсом. Об’єкт-контекст делегує роботу стратегії.</p><ul><li>Фільтри повідомлень у чаті</li><li>Напрямок сортування через делегат — спрощена стратегія</li><li>Знижки з лекції SOLID — теж стратегія</li></ul></div><div><img class="fig" src="../lectures/assets/08-gof-behavioral/Untitled 4.png" alt="strategy"></div></div></section>
-    <section class="slide "><h2>Mediator</h2>
-      <p class="lead">Об’єкти не знають одне про одного — говорять через посередника.</p>
+        <li>Уявіть чат: зайшов користувач — треба розіслати нотифікації. Звісно, підписку можна зняти.</li>
+        <li>У самій мові C# це <code>event</code>. У бібліотеці — <code>IObservable&lt;T&gt;</code>. Ми детальніше розберемо BCL на лекції 09.</li>
+        <li>Зверніть увагу, що суб’єкт не знає конкретних класів спостерігачів — він бачить лише інтерфейс.</li>
+      </ul>
+    </section>
+    <section class="slide "><h2>Команда <span style="color: var(--muted); font-weight: normal; font-size: 0.8em;">(Command)</span></h2>
+      <p class="lead">Запит стає окремим об’єктом. Ви можете поставити його в чергу, скасувати або записати в лог.</p>
+      <div class="grid">
+        <div>
+          <pre><code>interface ICommand { void Execute(); void Undo(); }
+class LightOn : ICommand {
+  private readonly Light _light;
+  public LightOn(Light light) =&gt; _light = light;
+  public void Execute() =&gt; _light.On();
+  public void Undo() =&gt; _light.Off();
+}</code></pre>
+        </div>
+        <div>
+          <ul class="small">
+            <li class="good"><strong>Коли:</strong> потрібна історія операцій, скасування (Undo/Redo) або відкладене виконання.</li>
+            <li class="bad"><strong>Уникайте, коли:</strong> ваша програма виконує прості лінійні операції. Перетворення кожної простої дії на окремий клас-команду змусить вас написати гори зайвого коду, що зробить архітектуру надмірно перевантаженою. У сучасному C# для багатьох задач достатньо передати звичайний делегат (<code>Action</code> або <code>Func</code>). <strong>Альтернатива:</strong> Прямі виклики методів або лямбда-вирази.</li>
+          </ul>
+        </div>
+      </div>
+      <p class="note">Згадайте MediatR: там є <code>IRequest</code> та <code>IRequestHandler</code>.</p>
+    </section>
+    <section class="slide "><h2>Стратегія <span style="color: var(--muted); font-weight: normal; font-size: 0.8em;">(Strategy)</span></h2>
+      <div class="grid">
+        <div>
+          <p>Контекст просто делегує роботу одному з алгоритмів за спільним інтерфейсом.</p>
+          <ul class="small">
+            <li class="good"><strong>Коли:</strong> є кілька варіантів одного алгоритму (сортування, знижки) і їх треба перемикати під час виконання.</li>
+            <li class="bad"><strong>Уникайте, коли:</strong> алгоритмів небагато і вони рідко змінюються. Виділення їх в окремі класи лише ускладнить читабельність коду. Крім того, клієнтський код мусить чітко знати, чим одна стратегія відрізняється від іншої, щоб обрати правильну, що розмазує бізнес-логіку по системі. <strong>Альтернатива:</strong> Звичайні <code>if/switch</code> або патерн Стан (якщо перемикання автоматичне).</li>
+          </ul>
+        </div>
+        <div><img class="fig" src="../lectures/assets/08-gof-behavioral/Untitled 4.png" alt="strategy"></div>
+      </div>
+    </section>
+    <section class="slide "><h2>Стан <span style="color: var(--muted); font-weight: normal; font-size: 0.8em;">(State)</span></h2>
+      <p class="lead">Схоже на стратегію, але тут стан <em>сам</em> вирішує, який крок буде наступним.</p>
+      <div class="grid">
+        <div>
+          <pre><code>class Order {
+  private IOrderState _state = new Draft();
+  public void Pay() =&gt; _state.Pay(this);
+  internal void Become(IOrderState next) 
+    =&gt; _state = next;
+}</code></pre>
+        </div>
+        <div>
+          <ul class="small">
+            <li class="good"><strong>Коли:</strong> поведінка об'єкта повністю змінюється залежно від його внутрішнього стану (кінцевий автомат).</li>
+            <li class="bad"><strong>Уникайте, коли:</strong> станів всього 2-3 і правила переходу між ними тривіальні. Використання патерну змусить вас створити купу нових класів, які розпорошать логіку кінцевого автомата. Вам доведеться стрибати по різних файлах, щоб зрозуміти, як об'єкт переходить зі стану в стан. <strong>Альтернатива:</strong> Простий <code>switch</code> або патерн Стратегія.</li>
+          </ul>
+        </div>
+      </div>
+      <p class="note">Порівняйте: стратегія каже «покладіть мені алгоритм», а стан каже «я вже Paid, тому Pay більше не діє».</p>
+    </section>
+    <section class="slide "><h2>Шаблонний метод <span style="color: var(--muted); font-weight: normal; font-size: 0.8em;">(Template Method)</span></h2>
+      <p class="lead">Ви тримаєте каркас алгоритму в базовому класі. А самі кроки робите <code>abstract</code> або <code>virtual</code> у нащадках.</p>
+      <div class="grid">
+        <div>
+          <pre><code>abstract class DataImporter {
+  public void Run() {
+    Open(); Read(); Parse(); Close();
+  }
+  protected abstract void Read();
+  protected virtual void Parse() { /* ... */ }
+}</code></pre>
+        </div>
+        <div>
+          <ul class="small">
+            <li class="good"><strong>Коли:</strong> є сталий алгоритм, але реалізація окремих його кроків має відрізнятися в нащадках.</li>
+            <li class="bad"><strong>Уникайте, коли:</strong> ви хочете зберегти гнучкість архітектури. Шаблонний метод базується на наслідуванні, що є найсильнішим типом зв'язності в ООП. Якщо базовий клас розростеться, змінити його без поломки всіх нащадків стане практично неможливо. <strong>Альтернатива:</strong> Патерн Стратегія (використовує гнучку композицію замість наслідування).</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+    <section class="slide "><h2>Ланцюжок обов’язків <span style="color: var(--muted); font-weight: normal; font-size: 0.8em;">(Chain of Responsibility)</span></h2>
+      <p class="lead">Ваш запит іде по руках. Хтось його обробив — або передав далі. Ланка може <em>зупинити</em> ланцюг.</p>
+      <div class="grid">
+        <div>
+          <pre><code>abstract class Handler {
+  protected Handler? Next;
+  public Handler SetNext(Handler n) { 
+    Next = n; return n; 
+  }
+  public virtual void Handle(string r) 
+    =&gt; Next?.Handle(r);
+}</code></pre>
+        </div>
+        <div>
+          <ul class="small">
+            <li class="good"><strong>Коли:</strong> запит можуть обробити різні об'єкти, і обробник не визначений заздалегідь.</li>
+            <li class="bad"><strong>Уникайте, коли:</strong> вам гарантовано треба виконати всі кроки обробки, або коли відсутність обробника є критичною помилкою. У класичному ланцюжку запит може дійти до самого кінця і просто загубитися. Крім того, дуже складно відлагодити скрізний стек викликів і зрозуміти, яка саме ланка зупинила процес. <strong>Альтернатива:</strong> Декоратор (якщо треба виконати <em>всі</em> кроки) або простий цикл (Pipeline).</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+    <section class="slide "><h2>Посередник <span style="color: var(--muted); font-weight: normal; font-size: 0.8em;">(Mediator)</span></h2>
+      <p class="lead">Об’єкти не знають одне про одного безпосередньо. Усі їхні розмови йдуть через посередника.</p>
+      <ul class="small">
+        <li class="good"><strong>Коли:</strong> компоненти системи занадто сильно пов'язані між собою (спагетті-код), що ускладнює їх тестування та повторне використання.</li>
+        <li class="bad"><strong>Уникайте, коли:</strong> бізнес-логіка починає повністю перетікати всередину медіатора (додаються перевірки, умови). Сам посередник дуже швидко ризикує перетворитися на непідтримуваний "божественний об'єкт" (God Object), що контролює всю систему і є єдиною точкою відмови. <strong>Альтернатива:</strong> Патерн Спостерігач (Observer).</li>
+      </ul>
+      <p class="note">Наприклад, кнопка не смикає список напряму, а каже медіатору: "мене натиснули". Медіатор вирішує, що з цим робити.</p>
+    </section>
+    <section class="slide "><h2>Коли який</h2>
       <ul>
-        <li>+</li><li>менше зв’язності, централізована логіка взаємодії</li>
-        <li>−</li><li>ризик «бог-об’єкта», зайва непрямість</li>
-      </ul></section>
+        <li>Якщо у вас багато слухачів однієї події — обирайте Observer.</li>
+        <li>Коли запит стає окремою річчю (для undo чи черги) — це Command.</li>
+        <li>Якщо клієнт обирає алгоритм — це Strategy. А коли об’єкт сам змінює свій режим — це State.</li>
+        <li>Маєте спільні кроки, але різні деталі — використовуйте Template Method.</li>
+        <li>Потрібен фільтр чи обробка по черзі з можливістю зупинки — беріть Chain of Responsibility.</li>
+        <li>Для зв’язку багато-до-багатьох без зайвої павутини — вам допоможе Mediator.</li>
+      </ul>
+    </section>
     <section class="slide next-step"><p class="kicker">Після лекції</p><h2>Що далі</h2>
-      <p class="lead">Спрощений медіатор (як MediatR): handlers як transient, свої тести маршрутизації.</p></section>
+      <p class="lead">На лабораторній ви напишете спрощений медіатор, схожий на MediatR. Ваші обробники будуть transient, і ви напишете власні тести для маршрутизації.</p>
+      <p class="note">Тему Iterator та <code>event</code> у BCL ми розглянемо на лекції 09. Якщо хочете, можете підготувати доповідь про патерни поза курсом — наприклад, Visitor, Memento чи Bridge.</p></section>
   </div>
   <div class="chrome">
     <span>OOP on top of C# · <b>GoF: поведінкові</b></span>

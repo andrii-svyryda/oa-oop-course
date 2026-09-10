@@ -9,15 +9,43 @@
 <body>
   <div class="progress"></div>
   <div class="deck">
-    <section class="slide title"><p class="kicker">Лекція 00</p><h1>OOP on top of C#</h1><p class="lead">Курс об’єктноорієнтованого програмування поверх C# / .NET.</p><div class="pills"><span class="pill">Острозька академія</span><span class="pill">C#</span><span class="pill">ООП</span></div></section>
-    <section class="slide "><h2>Передумови</h2><ul><li>Базові конструкції та синтаксис <code>.NET / C#</code></li><li>Консоль, типи, методи, масиви — уже знайомі</li><li>Курс іде глибше: абстракції, SOLID, DI, патерни GoF</li></ul></section>
-    <section class="slide "><h2>Навіщо ООП у C#</h2>
-      <p class="lead">Класичне ООП — стара й популярна парадигма. Основи закладені на початку 1960-х (об’єкти в LISP).</p>
+    <section class="slide title"><p class="kicker">Лекція 00</p><h1>OOP on top of C#</h1><p class="lead">Курс об’єктноорієнтованого програмування поверх C# / .NET. Матеріали зібрані так, щоб ви вчилися самостійно: до кожної теми є слайди, конспект і код.</p><div class="pills"><span class="pill">Острозька академія</span><span class="pill">C#</span><span class="pill">ООП</span></div></section>
+    <section class="slide "><h2>Передумови</h2>
+      <p class="lead">Ми не будемо вчити синтаксис із нуля. Консоль, типи, методи й масиви вже мають бути вам знайомі.</p>
       <ul>
-        <li>Більшість сучасних мов підтримують ООП зі своїми особливостями</li>
-        <li><strong>C# розроблений як мова з сильною підтримкою ООП</strong> — це фундаментальна основа платформи</li>
-      </ul></section>
-    <section class="slide "><h2>Що буде в курсі</h2><ul><li>Теорія ООП: абстракція, інкапсуляція, наслідування, поліморфізм</li><li>Generics, відносини між об’єктами, SOLID, DI</li><li>Патерни GoF і вбудовані шаблони .NET</li><li>Колекції, багатопотоковість, сучасний C#</li></ul></section>
+        <li>Базові конструкції <code>.NET / C#</code> ви вже писали.</li>
+        <li>У цьому курсі ми підемо глибше: розглянемо абстракції, SOLID, DI та патерни GoF.</li>
+      </ul>
+    </section>
+    <section class="slide "><h2>Навіщо ООП у C#</h2>
+      <p class="lead">Класичне ООП — це стара й популярна парадигма. Її основи були закладені ще на початку 1960-х років (об’єкти в LISP).</p>
+      <ul>
+        <li>Більшість сучасних мов підтримують ООП зі своїми особливостями.</li>
+        <li><strong>C# був розроблений як мова із сильною підтримкою ООП</strong> — це фундамент платформи, а не просто опція збоку.</li>
+      </ul>
+    </section>
+    <section class="slide "><h2>Що буде в курсі</h2>
+      <ul>
+        <li>Ми вивчимо теорію ООП: абстракцію, інкапсуляцію, наслідування та поліморфізм.</li>
+        <li>Розглянемо generics, відносини між об’єктами, SOLID та DI.</li>
+        <li>Опануємо патерни GoF і дізнаємося, де вони вже реалізовані в .NET.</li>
+        <li>Попрацюємо з колекціями, багатопотоковістю та сучасним синтаксисом C#.</li>
+      </ul>
+    </section>
+    <section class="slide "><h2>Три шари кожної теми</h2>
+      <div class="cols-3">
+        <article class="card"><h3>Слайди</h3><p class="small">Це коротка лекція. Відкрийте HTML у браузері: стрілки, пробіл, O — огляд, F — повний екран.</p></article>
+        <article class="card"><h3>Конспект</h3><p class="small">Тут ви знайдете той самий матеріал розгорнуто, з кодом і посиланнями на лабораторні роботи.</p></article>
+        <article class="card"><h3>Код</h3><p class="small">Це консольний проєкт у <code>code/lecture-NN-...</code>. Запускайте його й дивіться вивід разом зі слайдами.</p></article>
+      </div>
+    </section>
+    <section class="slide "><h2>Два плани лабораторних</h2>
+      <ul>
+        <li>Перелік лекцій для всіх однаковий. А от набір і номери лабораторних — ні.</li>
+        <li>В індивідуальному плані ви детальніше проходите раннє ООП: інтерфейси та default interface methods.</li>
+        <li>Лабораторні роботи ви виконуєте окремо від лекції. Завжди дивіться README свого плану, а не сусіда.</li>
+      </ul>
+    </section>
     <section class="slide "><h2>Джерела</h2>
       <div class="grid">
         <div>
@@ -29,14 +57,17 @@
           <li><a href="https://dotnet.microsoft.com/en-us/learn/csharp">Microsoft Learn / академія</a></li>
           <li><a href="https://krypton.com.ua/rozdil-1-osnovy-paterniv-proektuvannya/">Патерни українською (krypton.com.ua)</a></li>
         </ul>
-      </div></section>
-    <section class="slide "><h2>Як побудований курс</h2><ul><li>Лекція: концепція і короткий код</li><li>Лабораторні роботи виконуєте окремо від лекції. У загальному та індивідуальному планах номери робіт можуть не збігатися.</li></ul></section>
-    <section class="slide "><h2>Як формується оцінка</h2>
-      <p class="lead">Курс оцінюється за <strong>100-бальною</strong> шкалою.</p>
-      <div class="grid">
-        <article class="card"><h3>61 бал — лабораторні</h3><p class="small">Усі лабораторні роботи з вашого плану. Це основна частина оцінки протягом семестру.</p></article>
-        <article class="card"><h3>39 балів — екзамен</h3><p class="small">Набір запитань з тем курсу та невелике практичне завдання, яке ви покажете наживо.</p></article>
       </div>
+    </section>
+    <section class="slide "><h2>Як формується оцінка</h2>
+      <p class="lead">Ваша робота на курсі оцінюється за <strong>100-бальною</strong> шкалою.</p>
+      <div class="grid">
+        <article class="card"><h3>61 бал — лабораторні</h3><p class="small">Ви отримаєте за всі роботи з вашого плану. Це основна частина оцінки протягом семестру.</p></article>
+        <article class="card"><h3>39 балів — екзамен</h3><p class="small">Він складається із запитань з тем курсу та невеликого практичного завдання, яке ви покажете наживо.</p></article>
+      </div>
+    </section>
+    <section class="slide next-step"><p class="kicker">Після лекції</p><h2>Що далі</h2>
+      <p class="lead">Наступна тема — чотири стовпи ООП. Відкрийте слайди лекції 01 і проєкт <code>code/lecture-01-oop-theory</code>.</p>
     </section>
   </div>
   <div class="chrome">

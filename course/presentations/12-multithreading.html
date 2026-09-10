@@ -9,45 +9,71 @@
 <body>
   <div class="progress"></div>
   <div class="deck">
-    <section class="slide title"><p class="kicker">Лекція 12</p><h1>Багатопотоковість у C#</h1><p class="lead">Паралельність дає швидкість і гонки. Синхронізація — плата за спільний стан.</p><div class="pills"><span class="pill">Thread</span><span class="pill">ThreadPool</span><span class="pill">lock</span><span class="pill">async</span></div></section>
-    <section class="slide "><h2>Процес і потік</h2><div class="grid"><div><img class="fig" src="../lectures/assets/12-multithreading/Preemption.drawio.png" alt="preemption"></div><div><ul>
-          <li>Однопроцесорні ОС і витісняюча багатозадачність (Win95 як приклад)</li>
-          <li>Процес = адресний простір; потоків у ньому багато</li>
-          <li>У кожного процесу є головний потік</li>
-        </ul></div></div></section>
-    <section class="slide "><h2>Свій Thread</h2><pre><code>Thread t = new Thread(Worker);
-t.Start();                 // не блокує Main
-for (int i = 0; i &lt; 10; i++) {
-  Console.WriteLine(&quot;Main&quot;);
-  Thread.Sleep(100);
-}
-t.Join();                  // дочекатись Worker</code></pre></section>
+    <section class="slide title"><p class="kicker">Лекція 12</p><h1>Багатопотоковість у C#</h1><p class="lead">Паралельність дає вам швидкість, але й створює гонки. Синхронізація — це ваша плата за спільний стан.</p><div class="pills"><span class="pill">Thread</span><span class="pill">ThreadPool</span><span class="pill">lock</span><span class="pill">async</span></div></section>
+    <section class="slide "><h2>Процес і потік</h2>
+      <div class="grid">
+        <div><img class="fig" src="../lectures/assets/12-multithreading/Preemption.drawio.png" alt="preemption"></div>
+        <div>
+          <ul>
+            <li>Навіть на одному ядрі операційна система постійно перемикає задачі. Це називається витісняльною багатозадачністю.</li>
+            <li>Процес — це ваш адресний простір. Потоків у ньому може бути багато, і всі вони ділять спільну пам’ять.</li>
+            <li>У кожного процесу є головний потік — саме з нього стартує ваш метод <code>Main</code>.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+    <section class="slide "><h2>Свій Thread</h2>
+      <p class="lead">Метод <code>Start</code> не блокує ваш головний потік. А от <code>Join</code> чекає, доки інший потік закінчить свою роботу.</p>
+      <pre><code>Thread t = new Thread(Worker);
+t.Start();
+t.Join();</code></pre>
+      <p class="note">Створювати новий <code>Thread</code> на кожну дрібницю — це дуже дорого. Робіть так лише тоді, коли вам потрібне довге окреме життя потоку.</p>
+    </section>
     <section class="slide "><h2>ThreadPool</h2>
-      <p>Пул повторно використовує потоки. Не створюйте Thread на кожне дрібне завдання.</p>
-      <pre><code>ThreadPool.QueueUserWorkItem(Worker, &quot;Hello, world!&quot;);</code></pre></section>
-    <section class="slide "><h2>Гонка без lock</h2><div class="grid"><div><pre><code>public void PrintTable() {
-  for (int i = 1; i &lt;= 10; i++) {
-    Thread.Sleep(100);
-    Console.WriteLine(i);
-  }
-}
-// два потоки друкують впереміш</code></pre></div><div><pre><code>public void PrintTable() {
-  lock (this) { /* критична секція */ }
-}
-// також: Mutex, Semaphore
-// lock(this) у бібліотеках — погана практика;
-// краще private readonly object _sync = new();</code></pre></div></div></section>
-    <section class="slide "><h2>Task і async/await</h2><div class="grid"><div><ul>
-          <li>Потік керує ОС; Task — середовище виконання</li>
-          <li>Винятки в Task структурованіші, ніж « dig в чужому потоці»</li>
-          <li>TAP: <code>async Task</code> + <code>await</code></li>
-        </ul></div><div><pre><code>static async Task Main() {
-  Task task1 = Task.Run(
-    () =&gt; Console.WriteLine(&quot;work&quot;));
-  await task1;
-  Console.WriteLine(&quot;Task completed!&quot;);
-}</code></pre></div></div></section>
-    <section class="slide "><h2>Зв’язок з іншими темами</h2><p class="lead">Thread-safety одинака (<code>Lazy&lt;T&gt;</code>) і спільний стан у чаті — типові місця, де ця лекція проявляється. Окремої лабораторної з потоків немає.</p></section>
+      <p class="lead">Пул повторно використовує вже створені потоки. Будь-яке дрібне завдання кладіть саме сюди, а не створюйте <code>new Thread</code>.</p>
+      <pre><code>ThreadPool.QueueUserWorkItem(Worker, &quot;Hello, world!&quot;);</code></pre>
+    </section>
+    <section class="slide "><h2>Гонка без lock і з lock</h2>
+      <div class="grid">
+        <div>
+          <pre><code>// два потоки роблять n++
+// часто отримаєте не 20000</code></pre>
+          <p class="small">Спільна змінна без синхронізації неминуче призведе до гонки. Ваш результат буде непередбачуваним.</p>
+        </div>
+        <div>
+          <pre><code>lock (_sync) { n++; }
+// не lock(this) — хтось ззовні
+// може замкнути той самий об’єкт</code></pre>
+          <p class="small">Пам’ятайте, що поруч існують Mutex і Semaphore, які стануть у пригоді, коли ваша синхронізація ширша за один процес.</p>
+        </div>
+      </div>
+    </section>
+    <section class="slide "><h2>Task і async / await</h2>
+      <div class="grid">
+        <div>
+          <ul>
+            <li>Потік планує операційна система. А от <code>Task</code> планує ваше середовище виконання.</li>
+            <li>Винятки в завданні вам буде зловити значно простіше, ніж шукати «виняток у чужому потоці».</li>
+            <li>Ключове слово <code>await</code> не створює потік на кожне очікування — воно звільняє потік, поки ви чекаєте на відповідь від мережі чи диска.</li>
+          </ul>
+        </div>
+        <div><pre><code>static async Task Main() {
+  var n = await Task.Run(() =&gt; 2 + 2);
+  Console.WriteLine(n);
+}</code></pre></div>
+      </div>
+    </section>
+    <section class="slide "><h2>Що брати на практиці</h2>
+      <ul>
+        <li>Якщо вам потрібен довгий окремий потік — беріть <code>Thread</code>.</li>
+        <li>Для короткої роботи у тлі — обирайте <code>ThreadPool</code> або <code>Task.Run</code>.</li>
+        <li>Коли ви очікуєте на HTTP-запит чи читання файла — використовуйте <code>async</code> та <code>await</code>.</li>
+        <li>Щоб створити одинака без гонки — беріть <code>Lazy&lt;T&gt;</code>, як ви це робили на лекціях 06 і 09.</li>
+      </ul>
+    </section>
+    <section class="slide next-step"><p class="kicker">Після лекції</p><h2>Що далі</h2>
+      <p class="lead">Окремої лабораторної роботи з потоків у нас немає. Перевірте себе за запитаннями курсу й уважно розберіть код у папці <code>code/lecture-12-multithreading</code>.</p>
+    </section>
   </div>
   <div class="chrome">
     <span>OOP on top of C# · <b>Багатопотоковість</b></span>

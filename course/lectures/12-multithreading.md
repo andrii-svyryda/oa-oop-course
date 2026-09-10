@@ -2,224 +2,96 @@
 
 ## На що звернути увагу
 
-- Потоки, ThreadPool, синхронізація, TPL / async
+- Пам’ятайте, що процес тримає ваш адресний простір, а потоків у ньому може бути багато.
+- Створюйте `Thread` дуже рідко; усі дрібні задачі відправляйте у `ThreadPool` або `Task`.
+- Спільний стан без синхронізації неминуче дає гонку, тому завжди робіть `lock` на приватному об’єкті.
+- У новому коді завжди беріть `async` / `await` і `Task`, і ніколи не використовуйте сирі потоки.
 
 ## Спробуйте самі
 
-- Створення потоків
-- Проблема синхронізації
-- Асинхронне програмування
+- Запустіть другий `Thread` і обов’язково дочекайтеся його завершення через метод `Join`.
+- Поставте невелику роботу на виконання у `ThreadPool`.
+- Порахуйте інкремент з двох потоків спочатку без `lock`, а потім із `lock`, і порівняйте результати.
+- Виконайте `Task.Run` і дочекайтеся результату через `await`.
 
 ## Пов’язані лабораторні
 
-- Окремої нумерованої лабораторної немає; тему варто зв’язати з thread-safety одинака (`Lazy<T>`).
+Окремої нумерованої лабораторної роботи з цієї теми немає. Ця тема проявляється у вашому thread-safe одинаку (`Lazy<T>`, який ви бачили на лекціях 06 і 09) та в спільному стані чату.
 
 ---
 
-# Історія багатозадачності🛡️
+Паралельність дає вам швидкість, але й створює гонки. Синхронізація — це ваша плата за спільний стан.
 
-Однопроцесорні операційні системи та витісняльна багатозадачність
+Код до слайдів ви знайдете тут: `code/lecture-12-multithreading`.
 
-Приклад однопроцесорної операційної системи Windows 95 
+## Процес і потік
 
-![Preemption.drawio.png](assets/12-multithreading/Preemption.drawio.png)
+![витісняльна багатозадачність](assets/12-multithreading/Preemption.drawio.png)
 
-Деталі про процеси та потоки: [https://www.geeksforgeeks.org/difference-between-process-and-thread/](https://www.geeksforgeeks.org/difference-between-process-and-thread/)
+Навіть на одному ядрі операційна система постійно перемикає задачі (це називається витісняльною багатозадачністю; історичний приклад — Windows 95). **Процес** — це ваш адресний простір. Усередині нього працює багато **потоків**, які ділять між собою спільну пам’ять. У кожного процесу є головний потік — саме той, з якого стартує ваш метод `Main`.
 
-## Багатозадачність в C#
+Детальніше про різницю процесу й потоку ви можете прочитати тут: [Process vs Thread](https://www.geeksforgeeks.org/difference-between-process-and-thread/).
 
-### Створюємо потоки
+## Свій Thread
 
-У кожного процесу є головний потік програми.
+Метод `Start` не блокує ваш `Main`. А от `Join` чекає, доки інший потік закінчить свою роботу.
 
 ```csharp
-using System;
-using System.Threading;
+var finished = false;
+var worker = new Thread(() => finished = true);
+worker.Start();
+worker.Join();
+```
 
-class Program
+Створювати новий `Thread` на кожну дрібницю — це дуже дорого. Робіть так лише тоді, коли вам потрібен довгий окремий потік із своїм власним життям.
+
+## ThreadPool
+
+Пул повторно використовує вже створені потоки.
+
+```csharp
+ThreadPool.QueueUserWorkItem(_ =>
 {
-	static void Main()
-	{
-		// створюємо новий поітк
-		Thread t = new Thread(Worker);
-
-		// запускаємо потік - неблокує основний потік програми
-		t.Start();
-
-		// емулюємо роботу в основному потоці
-		for (int i = 0; i < 10; i++)
-		{
-			Console.WriteLine("Main thread doing some work");
-			Thread.Sleep(100);
-		}
-
-		// чекаємо поки головний потік завершить виконання
-		t.Join();
-
-		Console.WriteLine("Done");
-	}
-
-	static void Worker()
-	{
-		for (int i = 0; i < 10; i++)
-		{
-			Console.WriteLine("Worker thread doing some work");
-			Thread.Sleep(100);
-		}
-	}
-}
-
+	Console.WriteLine(Environment.CurrentManagedThreadId);
+});
 ```
 
-### ThreadPool
+Будь-яке коротке фонове завдання відправляйте сюди або в `Task.Run`. Ніколи не створюйте `new Thread` лише тому, що «так було у прикладі з інтернету».
 
-У C# ThreadPool - це керований пул потоків, наданий .NET Framework для ефективного управління та повторного використання потоків. Він дозволяє виконувати асинхронні та паралельні операції без явного створення та управління потоками самостійно. ThreadPool часто використовується для виконання непродовжуваних завдань або дій в багатопотоковому середовищі для покращення продуктивності та використання ресурсів.
+## Гонка і lock
+
+Якщо ваші два потоки пишуть у одну змінну — результат буде непередбачуваним. **Критична секція** пропускає лише один потік за раз.
 
 ```csharp
-using System;
-using System.Threading;
-
-class Program
+var sync = new object();
+lock (sync)
 {
-	static void Main()
-	{
-		// queue a work item to the thread pool
-		ThreadPool.QueueUserWorkItem(Worker, "Hello, world!");
-
-		// do some other work in the main thread
-		for (int i = 0; i < 10; i++)
-		{
-			Console.WriteLine("Main thread doing some work");
-			Thread.Sleep(100);
-		}
-
-		Console.WriteLine("Done");
-	}
-
-	static void Worker(object state)
-	{
-	Console.WriteLine("Thread: {0}", Thread.CurrentThread.ManagedThreadId);
-		string message = (string)state;
-
-		for (int i = 0; i < 10; i++)
-		{
-			Console.WriteLine(message);
-			Thread.Sleep(100);
-		}
-	}
-}
-
-```
-
-## Проблема синхронізації між потоками
-
-[https://www.javatpoint.com/c-sharp-thread-synchronization](https://www.javatpoint.com/c-sharp-thread-synchronization)
-
-Синхронізація — це техніка, що дозволяє лише одному потоку отримати доступ до ресурсу протягом певного часу. Жоден інший потік не може перервати його доти, доки призначений потік не завершить своє завдання.
-
-У програмі з багатопотоковістю потокам дозволяється отримувати доступ до будь-якого ресурсу протягом необхідного часу виконання. Потоки діляться ресурсами та виконуються асинхронно. Доступ до спільних ресурсів (даних) є критичним завданням, що іноді може зупинити систему. Ви вирішуєте це, зробивши потоки синхронізованими.
-
-Це головним чином використовується у випадку транзакцій, таких як внесення коштів, зняття коштів тощо. 
-
-Приклад з відсутньою синхронізацією:
-
-```csharp
-using System;  
-using System.Threading;  
-class Printer  
-{  
-    public void PrintTable()  
-    {  
-        for (int i = 1; i <= 10; i++)  
-        {  
-            Thread.Sleep(100);  
-            Console.WriteLine(i);  
-        }  
-    }  
-}  
-class Program  
-{  
-    public static void Main(string[] args)  
-    {  
-        Printer p = new Printer();  
-        Thread t1 = new Thread(new ThreadStart(p.PrintTable));  
-        Thread t2 = new Thread(new ThreadStart(p.PrintTable));  
-        t1.Start();  
-        t2.Start();  
-    }  
-}  
-```
-
-Приклад з примітивом синхронізації lock
-
-```csharp
-using System;  
-using System.Threading;  
-class Printer  
-{  
-    public void PrintTable()  
-    {  
-        lock (this)  
-        {  
-            for (int i = 1; i <= 10; i++)  
-            {  
-                Thread.Sleep(100);  
-                Console.WriteLine(i);  
-            }  
-        }  
-    }  
-}  
-class Program  
-{  
-    public static void Main(string[] args)  
-    {  
-        Printer p = new Printer();  
-        Thread t1 = new Thread(new ThreadStart(p.PrintTable));  
-        Thread t2 = new Thread(new ThreadStart(p.PrintTable));  
-        t1.Start();  
-        t2.Start();  
-    }  
-}  
-```
-
-lock - [https://learn.microsoft.com/en-us/windows/win32/sync/condition-variables?redirectedfrom=MSDN](https://learn.microsoft.com/en-us/windows/win32/sync/condition-variables?redirectedfrom=MSDN)
-
-mutex
-
-semaphore
-
-## Асинхронне програмування та TPL
-
-[https://learn.microsoft.com/en-us/dotnet/standard/asynchronous-programming-patterns/task-based-asynchronous-pattern-tap?redirectedfrom=MSDN](https://learn.microsoft.com/en-us/dotnet/standard/asynchronous-programming-patterns/task-based-asynchronous-pattern-tap?redirectedfrom=MSDN)
-
-[https://medium.com/@nirajranasinghe/understanding-concurrency-in-c-with-threads-tasks-and-threadpool-4c80f6e03df9](https://medium.com/@nirajranasinghe/understanding-concurrency-in-c-with-threads-tasks-and-threadpool-4c80f6e03df9)
-
-**Завдання проти Потоку: Основні відмінності**
-Хоча завдання та потоки обидва представляють собою одиниці роботи, вони відрізняються у кількох ключових аспектах:
-
-**Модель виконання:** Потоки керуються операційною системою, тоді як завдання керуються середовищем виконання.
-
-**Управління ресурсами:** Потоки потребують явного управління ресурсами, тоді як завдання керуються середовищем виконання.
-
-**Обробка винятків:** Винятки на основі потоків можуть бути важкими для обробки, тоді як завдання забезпечують структурований підхід до обробки винятків.
-
-```csharp
-using System;
-using System.Threading.Tasks;
-
-class Program
-{
-    static async Task Main()
-    {
-        // створюємо таску
-        Task task1= Task.Run(() => Console.WriteLine("Doing some work in a task."));
-
-        // чекаємо виконання
-        await task1;
-
-        Console.WriteLine("Task completed!");
-    }
+	n++;
 }
 ```
 
-[https://blog.stephencleary.com/2012/02/async-and-await.html](https://blog.stephencleary.com/2012/02/async-and-await.html)
+Писати `lock (this)` у бібліотечному коді — це дуже погана звичка, адже хтось ззовні може замкнути той самий об’єкт. Завжди тримайте для цього `private readonly object _sync = new()`. Пам’ятайте, що поруч існують `Mutex` і `Semaphore`, які стануть у пригоді, коли ваша синхронізація виходить за межі одного процесу.
+
+Документація для вас: [lock statement](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/statements/lock).
+
+## Task і async / await
+
+Потік планує операційна система. А от **завдання (`Task`)** планує ваше середовище виконання: тут вам буде значно простіше зловити виняток і простіше скласти кілька робіт разом.
+
+```csharp
+static async Task Main()
+{
+	var result = await Task.Run(() => 2 + 2);
+	Console.WriteLine(result);
+}
+```
+
+Це TAP — task-based asynchronous pattern. Ключові слова `async` / `await` не створюють потік «на кожне await»; вони просто звільняють потік, поки ви чекаєте на відповідь від мережі чи диска.
+
+Коротко для вас:
+
+- якщо потрібен окремий довгий потік — беріть `Thread`;
+- для короткої роботи у тлі — обирайте `ThreadPool` або `Task.Run`;
+- коли у вас є операція очікування (HTTP, файл) — використовуйте `async` та `await`.
+
+Читати далі: [Task-based async](https://learn.microsoft.com/en-us/dotnet/standard/asynchronous-programming-patterns/task-based-asynchronous-pattern-tap) і [Stephen Cleary про async](https://blog.stephencleary.com/2012/02/async-and-await.html).

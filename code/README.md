@@ -1,12 +1,12 @@
-# Runnable lecture examples
+# Приклади з лекцій
 
-Console apps with code from the lecture slides. Run one project and walk the sections as you go through the deck.
+Тут зібрані консольні проєкти з кодом, який ви бачите на слайдах. Запустіть потрібний проєкт і проходьте секції паралельно з презентацією.
 
-## Requirements
+## Що вам знадобиться
 
-- [.NET 8 SDK](https://dotnet.microsoft.com/download) (you have it if `dotnet --version` works)
+- [.NET 8 SDK](https://dotnet.microsoft.com/download) — перевірте в терміналі команду `dotnet --version`. Якщо вона працює, усе вже готово.
 
-## Run
+## Як запускати
 
 ```powershell
 cd code
@@ -15,9 +15,17 @@ dotnet run --project lecture-01-oop-theory
 dotnet run --project lecture-02-generics
 dotnet run --project lecture-03-object-relationships
 dotnet run --project lecture-04-solid
+dotnet run --project lecture-05-dependency-injection
+dotnet run --project lecture-06-gof-creational
+dotnet run --project lecture-07-gof-structural
+dotnet run --project lecture-08-gof-behavioral
+dotnet run --project lecture-09-builtin-csharp-patterns
+dotnet run --project lecture-10-new-csharp-features
+dotnet run --project lecture-11-collections
+dotnet run --project lecture-12-multithreading
 ```
 
-Or build the whole solution:
+Або ви можете зібрати весь розв’язок одразу:
 
 ```powershell
 dotnet build OopCourse.sln

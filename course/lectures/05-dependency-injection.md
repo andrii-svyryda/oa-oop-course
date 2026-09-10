@@ -2,15 +2,11 @@
 
 ## На що звернути увагу
 
-- Що таке залежності
-- Способи передачі залежностей
-- IoC-контейнери
+Зверніть увагу на те, що таке залежності та як вони впливають на архітектуру вашого коду. Ви дізнаєтеся про різні способи передачі залежностей та розберетеся, як працюють IoC-контейнери.
 
 ## Спробуйте самі
 
-- Клас Worker, який обробляє дані залежно від типу роботи
-- Вбудовані засоби IoC у C# / .NET
-- Життєві цикли: Transient, Scoped, Singleton
+Спробуйте на практиці розібратися, де саме доречно використовувати оператор `new`: переконайтеся, що ви створюєте об’єкти лише в корені композиції, а не всередині бізнес-класів. Дослідіть вбудовані засоби IoC у C# та .NET. Також поекспериментуйте з різними життєвими циклами сервісів, такими як Transient, Scoped та Singleton.
 
 ## Пов’язані лабораторні
 
@@ -133,12 +129,72 @@ internal class Program
 }
 ```
 
-## Life time
+## Service lifetimes
 
-There are three lifetimes that can be used with Microsoft Dependency Injection Container, they are:
+Lifetime підказує контейнеру Microsoft.Extensions.DependencyInjection, **як довго житиме екземпляр** після `GetService` або інжекції в конструктор.
 
-- **Transient** — Services are created **each time they are requested**. It gets a new instance of the injected object, on each request of this object. For each time you inject this object is injected in the class, it will create a new instance.
-- **Scoped** — Services are created **on each request** (once per request). This is most recommended for WEB applications. So for example, if during a request you use the same dependency injection, in many places, you will use the same instance of that object, it will make reference to the same memory allocation.
-- **Singleton** — Services are created **once for the lifetime of the application**. It uses the same instance for the whole application.
+Три режими:
 
-[https://jason.sultana.net.au/dotnet/testing/2022/08/06/dependency-injection-in-console-app.html](https://jason.sultana.net.au/dotnet/testing/2022/08/06/dependency-injection-in-console-app.html)
+| Lifetime | Коли створюється | Де один і той самий | Типовий приклад |
+|---|---|---|---|
+| **Transient** | щоразу, коли просять | ніде — завжди новий | мапер, калькулятор, дрібний helper |
+| **Scoped** | один раз на scope | у межах одного scope або HTTP-запиту | `DbContext`, поточний користувач |
+| **Singleton** | один раз на застосунок | скрізь, усі scope бачать те саме | конфіг, кеш, фабрика клієнтів |
+
+У ASP.NET Core scope відкривається на кожен HTTP-запит самостійно. У консолі ви створюєте scope вручну:
+
+```csharp
+using var scope = host.Services.CreateScope();
+var db = scope.ServiceProvider.GetRequiredService<IOrderDb>();
+```
+
+### Як побачити різницю
+
+Один клас `Operation` у конструкторі запам’ятовує свій `Guid`. Ми реєструємо його тричі — як Transient, Scoped і Singleton. Далі відкриваємо два scope і робимо по два резолви в кожному.
+
+```csharp
+public class Operation : ITransientOp, IScopedOp, ISingletonOp
+{
+    public Guid Id { get; } = Guid.NewGuid();
+}
+
+services.AddTransient<ITransientOp, Operation>();
+services.AddScoped<IScopedOp, Operation>();
+services.AddSingleton<ISingletonOp, Operation>();
+```
+
+Ось що ви побачите:
+
+- два Transient у одному scope — **різні** Guid;
+- два Scoped у одному scope — **однакові**;
+- Scoped у двох scope — **різні**;
+- Singleton у двох scope — **один і той самий**.
+
+Код прикладу: `code/lecture-05-dependency-injection`.
+
+### Коли який брати
+
+**Transient.** Коли немає спільного стану і об’єкт дешевий. Його можна безпечно передавати в Scoped і Singleton, адже він живе недовго. Не кладіть сюди підключення до БД чи великий кеш.
+
+**Scoped.** Коли є один «контекст роботи»: транзакція, unit of work, дані поточного запиту. Не резолвіть Scoped із кореня контейнера без `CreateScope`, інакше отримаєте warning або виняток.
+
+**Singleton.** Коли вам потрібне щось спільне на весь процес. Він має бути thread-safe. Створюється при першому запиті (або одразу, якщо ви реєструєте готовий екземпляр).
+
+### Captive dependency
+
+Довгоживучий сервіс не може тримати короткоживучий у полі: ваш Scoped тоді житиме стільки ж, скільки й Singleton.
+
+```csharp
+services.AddScoped<IOrderDb, OrderDb>();
+services.AddSingleton<OrderCache>(); // конструктор(IOrderDb) — полон
+```
+
+`OrderCache` створиться раз і назавжди залишить собі один `OrderDb`. Ваш наступний HTTP-запит побачить чужий контекст.
+
+Правило: **залежність живе не довше за свого власника.**
+
+- Singleton залежить лише від Singleton;
+- Scoped — від Scoped або Singleton;
+- Transient — від будь-кого.
+
+[DI в консолі](https://jason.sultana.net.au/dotnet/testing/2022/08/06/dependency-injection-in-console-app.html) · [Service lifetimes (Microsoft)](https://learn.microsoft.com/en-us/dotnet/core/extensions/dependency-injection#service-lifetimes)

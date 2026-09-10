@@ -9,27 +9,135 @@
 <body>
   <div class="progress"></div>
   <div class="deck">
-    <section class="slide title"><p class="kicker">Лекція 07</p><h1>Структурні патерни GoF</h1><p class="lead">Як збирати класи разом: обгортки, спрощені фасади й дерева однотипних вузлів.</p><div class="pills"><span class="pill">Decorator</span><span class="pill">Facade</span><span class="pill">Adapter</span><span class="pill">Composite</span></div></section>
-    <section class="slide "><h2>Декоратор</h2><p class="lead">Як додати нову поведінку, не чіпаючи старий код? Просто обгорніть його.</p><div class="grid"><div><img class="fig" src="../lectures/assets/07-gof-structural/image.png" alt="decorator">
-        <p class="small">Ми зберігаємо той самий контракт, але додаємо щось своє до або після виклику.</p></div><div><ul>
-          <li>Це ідеально підходить для retry, логування, кешу чи шифрування.</li>
-          <li>Ви можете нанизувати їх рекурсивно: декоратор на декоратор.</li>
-          <li>Клієнт навіть не здогадується, що працює з обгорткою, а не з оригіналом.</li>
-        </ul></div></div></section>
-    <section class="slide "><h2>Декоратори над IMessenger</h2><p class="lead">Можемо додати логування чи повторні спроби, обгорнувши базовий месенджер.</p><div class="grid"><div><img class="fig" src="../lectures/assets/07-gof-structural/image 1.png" alt="chain"></div><div><pre><code>public interface IMessenger {
+    <section class="slide title"><p class="kicker">Лекція 07</p><h1>Структурні патерни GoF</h1><p class="lead">Як скласти класи разом, не ламаючи вже написаний код.</p><div class="pills"><span class="pill">Decorator</span><span class="pill">Proxy</span><span class="pill">Adapter</span><span class="pill">Facade</span><span class="pill">Composite</span></div></section>
+    <section class="slide "><h2>Сьогодні не про new</h2>
+      <p class="lead">Породжувальні патерни ми з вами вже розібрали. Тепер уявіть, що об’єкт уже створено — ми будемо його обгортати, спрощувати доступ до нього або ставити в дерево.</p>
+    </section>
+    <section class="slide "><h2>Декоратор <span style="color: var(--muted); font-weight: normal; font-size: 0.8em;">(Decorator)</span></h2>
+      <p class="lead">Ми додаємо нову поведінку навколо того самого контракту, не чіпаючи оригінальний клас.</p>
+      <div class="grid">
+        <div>
+          <img class="fig" src="../lectures/assets/07-gof-structural/image.png" alt="decorator">
+        </div>
+        <div>
+          <ul class="small">
+            <li>Клієнт викликає <code>IMessenger</code> і не здогадується, що перед ним обгортка.</li>
+            <li class="good"><strong>Коли:</strong> треба динамічно додати логування, retry, кеш чи шифрування, нанизуючи їх один на одного.</li>
+            <li class="bad"><strong>Уникайте, коли:</strong> порядок нанизування обгорток має критичне значення, оскільки клієнт може легко помилитися під час їх конструювання. Крім того, наявність десятків дрібних декораторів перетворює код ініціалізації на величезну і нечитабельну "матрьошку". Відлагоджувати такий код стає дуже важко. <strong>Альтернатива:</strong> Патерн Стратегія (якщо є чіткі точки розширення).</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+    <section class="slide "><h2>Декоратори над IMessenger</h2>
+      <p class="lead">Ви самі вирішуєте, як зібрати ланцюжок: спочатку логування, а потім retry, або навпаки.</p>
+      <div class="grid">
+        <div><img class="fig" src="../lectures/assets/07-gof-structural/image 1.png" alt="decorators"></div>
+        <div><pre><code>public interface IMessenger {
   void Send(Message message);
   Message Receive();
 }
-// LoggingMessenger : IMessenger
-// RetryMessenger : IMessenger
-// обидва тримають inner IMessenger всередині себе</code></pre></div></div></section>
-    <section class="slide "><h2>Фасад</h2><p class="lead">Сховайте складну підсистему за єдиним простим класом.</p><div class="grid"><div><ul>
-          <li>Ви даєте клієнту простий інтерфейс замість десятка складних.</li>
-          <li>Наприклад, метод <code>PlaceOrder</code> сам викличе і Product, і Payment, і Invoice.</li>
-          <li>Клієнту більше не треба збирати цю оркестрацію вручну.</li>
-        </ul></div><div><img class="fig" src="../lectures/assets/07-gof-structural/image 6.png" alt="facade"></div></div></section>
-    <section class="slide "><h2>Adapter і Composite</h2><p class="lead">Ще два корисних інструменти для побудови структури.</p><div class="grid"><div><article class="card"><h3>Adapter</h3><p>У вас є чужий інтерфейс, а вам потрібен ваш контракт. Наприклад, ви адаптуєте стару бібліотеку логування під сучасний <code>ILogger</code>.</p></article></div><div><article class="card"><h3>Composite</h3><p>Дозволяє працювати з окремим об’єктом і групою об’єктів однаково. Наприклад, <code>IGraphic</code> може бути як одним колом (Circle), так і групою фігур (GroupOfGraphics).</p></article></div></div></section>
-    <section class="slide "><h2>Як обрати потрібний патерн</h2><p class="lead">Правила-маркери:</p><ul><li>Хочете додати поведінку навколо існуючого об’єкта непомітно для інших? Беріть <strong>Decorator</strong>.</li><li>Клієнту доводиться смикати занадто багато класів для однієї дії? Сховайте їх за <strong>Facade</strong>.</li><li>Маєте два несумісні інтерфейси, які треба подружити? Пишіть <strong>Adapter</strong>.</li><li>Будуєте дерево елементів, де гілка поводиться так само, як листок? Це <strong>Composite</strong>.</li></ul></section>
+// LoggingMessenger(inner)
+// RetryMessenger(inner)
+IMessenger m = new RetryMessenger(
+  new LoggingMessenger(real));</code></pre></div>
+      </div>
+    </section>
+    <section class="slide "><h2>Проксі <span style="color: var(--muted); font-weight: normal; font-size: 0.8em;">(Proxy)</span></h2>
+      <p class="lead">Це обгортка з тим самим контрактом, щоб контролювати доступ або ліниво створювати об’єкт.</p>
+      <div class="grid">
+        <div>
+          <pre><code>class ImageProxy : IImage {
+  private HeavyImage? _real;
+  public void Draw() {
+    _real ??= new HeavyImage(path);
+    _real.Draw();
+  }
+}</code></pre>
+        </div>
+        <div>
+          <ul class="small">
+            <li class="good"><strong>Коли:</strong> потрібен лінивий доступ до важкого об'єкта, логування викликів, кешування або контроль прав доступу.</li>
+            <li class="bad"><strong>Уникайте, коли:</strong> приховування реальності грає проти вас. Проксі має той самий інтерфейс, що й оригінал, тому клієнт очікує швидкого виконання. Якщо ваш проксі під капотом робить важкі мережеві запити, клієнт отримає непередбачуване зависання програми. Краще робити такі важкі операції явно. <strong>Альтернатива:</strong> Асинхронні методи, явний Фасад або пряме створення.</li>
+          </ul>
+        </div>
+      </div>
+      <p class="note">Decorator додає нову фічу, а Proxy вирішує, <em>чи</em> і <em>коли</em> пустити виклик далі.</p>
+    </section>
+    <section class="slide "><h2>Адаптер <span style="color: var(--muted); font-weight: normal; font-size: 0.8em;">(Adapter)</span></h2>
+      <p class="lead">Коли чужий інтерфейс не підходить, ви пишете адаптер, який перекладає виклики на ваш контракт.</p>
+      <div class="grid">
+        <div>
+          <pre><code>class LegacyLog { public void WriteLine(string x) {} }
+
+class LoggerAdapter : ILogger {
+  private readonly LegacyLog _old;
+  public LoggerAdapter(LegacyLog old) =&gt; _old = old;
+  public void Log(string msg) =&gt; _old.WriteLine(msg);
+}</code></pre>
+        </div>
+        <div>
+          <ul class="small">
+            <li class="good"><strong>Коли:</strong> треба використати існуючий клас (наприклад, сторонню бібліотеку чи застарілий код), але його інтерфейс не збігається з вашим контрактом.</li>
+            <li class="bad"><strong>Уникайте, коли:</strong> ви є власником обох інтерфейсів і маєте доступ до їхнього коду. Замість того, щоб будувати "милиці" у вигляді класів-адаптерів і плодити зайві абстракції, набагато ефективніше провести рефакторинг старого коду і звести все до єдиного стандарту. <strong>Альтернатива:</strong> Рефакторинг оригіналу.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+    <section class="slide "><h2>Фасад <span style="color: var(--muted); font-weight: normal; font-size: 0.8em;">(Facade)</span></h2>
+      <p class="lead">Коли підсистема занадто складна, ми даємо клієнту одні прості двері для взаємодії з нею.</p>
+      <div class="grid">
+        <div>
+          <ul class="small">
+            <li>Facade не додає нових фіч навколо одного об’єкта — він приховує від вас цілу групу класів (Product, Payment, Invoice).</li>
+            <li class="good"><strong>Коли:</strong> потрібен простий та зрозумілий інтерфейс до складної підсистеми з багатьма класами.</li>
+            <li class="bad"><strong>Уникайте, коли:</strong> Фасад бере на себе занадто багато відповідальності та починає керувати абсолютно всіма процесами. З часом він перетворюється на "божественний об'єкт" (God Object), який має сотні методів. Будь-яка зміна в програмі вимагатиме зміни цього Фасаду. <strong>Альтернатива:</strong> Розділити систему на кілька вужчих сервісів або використати Медіатор.</li>
+          </ul>
+        </div>
+        <div><img class="fig" src="../lectures/assets/07-gof-structural/image 6.png" alt="facade"></div>
+      </div>
+    </section>
+    <section class="slide "><h2>Компонувальник <span style="color: var(--muted); font-weight: normal; font-size: 0.8em;">(Composite)</span></h2>
+      <p class="lead">Він дозволяє дати і листку, і групі об’єктів однаковий інтерфейс. Ви будуєте дерево (наприклад, група кіл).</p>
+      <div class="grid">
+        <div>
+          <pre><code>interface IGraphic { void Draw(); }
+class Circle : IGraphic { public void Draw() { } }
+class Group : IGraphic {
+  private readonly List&lt;IGraphic&gt; _items = new();
+  public void Add(IGraphic g) =&gt; _items.Add(g);
+  public void Draw() { 
+    foreach (var g in _items) g.Draw(); 
+  }
+}</code></pre>
+        </div>
+        <div>
+          <ul class="small">
+            <li class="good"><strong>Коли:</strong> об'єкти мають деревоподібну структуру і клієнту зручно працювати з цілим деревом як з одним об'єктом.</li>
+            <li class="bad"><strong>Уникайте, коли:</strong> відмінностей між "листком" і "групою" занадто багато. Щоб мати спільний інтерфейс, вам доведеться додати методи типу <code>AddChild()</code> у базовий контракт. Тоді звичайний листок (наприклад, коло) муситиме їх реалізовувати і кидати <code>NotSupportedException</code>, що грубо порушує принципи ISP та LSP. <strong>Альтернатива:</strong> Звичайні колекції <code>List&lt;T&gt;</code> без об'єднання загальним інтерфейсом.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+    <section class="slide "><h2>Не плутайте обгортки</h2>
+      <ul>
+        <li><strong>Decorator</strong> — зберігає той самий контракт, але додає нову поведінку, наприклад, логування чи retry.</li>
+        <li><strong>Proxy</strong> — також зберігає контракт, але контролює доступ до об’єкта або момент його створення.</li>
+        <li><strong>Adapter</strong> — дозволяє вам зробити <em>інший</em>, чужий контракт своїм.</li>
+        <li><strong>Facade</strong> — дозволяє нам сховати багато складних класів за одним простим.</li>
+      </ul>
+    </section>
+    <section class="slide "><h2>Коли який</h2>
+      <ul>
+        <li>Якщо вам потрібно нанизати retry або лог на існуючий сервіс — беріть Decorator.</li>
+        <li>Якщо ви не хочете вантажити важкий об’єкт, доки вас про це не попросять — використовуйте Proxy.</li>
+        <li>Якщо перед вами стара бібліотека з чужим API — пишіть Adapter.</li>
+        <li>Коли дія одна, а всередині десять класів — вам потрібен Facade.</li>
+        <li>А якщо ви будуєте дерево з однотипних вузлів — це Composite.</li>
+      </ul>
+    </section>
+    <section class="slide next-step"><p class="kicker">Після лекції</p><h2>Що далі</h2>
+      <p class="lead">Наступна лекція — поведінкові патерни: як об’єкти взаємодіють між собою.</p>
+      <p class="note">Окремої лабораторної на структурні патерни в нас немає. Знання про композицію, які ви отримали на третій лекції, ми тут просто застосовуємо на практиці.</p></section>
   </div>
   <div class="chrome">
     <span>OOP on top of C# · <b>GoF: структурні</b></span>

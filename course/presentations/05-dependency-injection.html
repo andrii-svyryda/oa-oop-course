@@ -9,7 +9,7 @@
 <body>
   <div class="progress"></div>
   <div class="deck">
-    <section class="slide title"><p class="kicker">Лекція 05</p><h1>Впровадження залежностей</h1><p class="lead">Не створюй сервіс сам — отримай його ззовні.</p><div class="pills"><span class="pill">IoC</span><span class="pill">Transient</span><span class="pill">Scoped</span><span class="pill">Singleton</span></div></section>
+    <section class="slide title"><p class="kicker">Лекція 05</p><h1>Впровадження залежностей</h1><p class="lead">Не створюйте сервіс самі — отримайте його ззовні.</p><div class="pills"><span class="pill">IoC</span><span class="pill">Transient</span><span class="pill">Scoped</span><span class="pill">Singleton</span></div></section>
     <section class="slide "><h2>Щільне зв’язування</h2><div class="grid"><div><img class="fig" src="../lectures/assets/05-dependency-injection/Untitled.png" alt="coupling">
         <p class="note">Зміна логера змушує чіпати MessageProcessor.</p></div><div><pre><code>public class MessageProcessorForTightCoupling {
   private LogManager logManager;
@@ -26,9 +26,67 @@
 
 var sender = host.Services.GetService&lt;NotificationService&gt;();
 sender.PushNotification(&quot;DI is not DIP&quot;);</code></pre></section>
-    <section class="slide "><h2>Service lifetimes</h2><div class="cols-3"><article class="card"><h3>Transient</h3><p class="small">Новий екземпляр на кожен запит із контейнера.</p></article><article class="card"><h3>Scoped</h3><p class="small">Один екземпляр на scope / HTTP-запит. Типово для web.</p></article><article class="card"><h3>Singleton</h3><p class="small">Один екземпляр на весь час життя застосунку.</p></article></div></section>
-    <section class="slide "><h2>Варто розібрати</h2><p class="lead"><code>Worker</code>, який обробляє дані залежно від типу роботи: конкретну стратегію роботи йому передають, він її не створює.</p></section>
-    <section class="slide "><h2>Правило на слайд</h2><p class="lead"><code>new</code> конкретних сервісів у бізнес-класі — запах. Композиція кореня (Program / Startup) — єдине місце, де збираємо граф.</p></section>
+    <section class="slide "><h2>Service lifetimes</h2>
+      <p class="lead">Lifetime підказує контейнеру, як довго житиме екземпляр після <code>GetService</code>.</p>
+      <div class="cols-3">
+        <article class="card"><h3>Transient</h3><p class="small">Щоразу новий об’єкт. Два <code>GetService</code> підряд дадуть різні Guid.</p></article>
+        <article class="card"><h3>Scoped</h3><p class="small">Один об’єкт на scope. У вебі один scope — це один HTTP-запит. У консолі ви створюєте scope самі.</p></article>
+        <article class="card"><h3>Singleton</h3><p class="small">Один об’єкт на весь застосунок. Усі ваші scope бачать той самий екземпляр.</p></article>
+      </div>
+    </section>
+    <section class="slide "><h2>Як побачити різницю</h2>
+      <p class="lead">Кожен сервіс у конструкторі запам’ятовує свій <code>Guid</code>. Порівняйте їхні ідентифікатори.</p>
+      <pre><code>services.AddTransient&lt;ITransientOp, Operation&gt;();
+services.AddScoped&lt;IScopedOp, Operation&gt;();
+services.AddSingleton&lt;ISingletonOp, Operation&gt;();
+
+using var scope1 = provider.CreateScope();
+using var scope2 = provider.CreateScope();
+// у scope1 два Transient — різні
+// у scope1 два Scoped — однакові
+// Scoped у scope1 і scope2 — різні
+// Singleton у scope1 і scope2 — один і той самий</code></pre>
+    </section>
+    <section class="slide "><h2>Transient</h2>
+      <ul>
+        <li>Легка робота без спільного стану: мапер, калькулятор, «зробили й забули».</li>
+        <li>Безпечно передавати в будь-який інший сервіс, адже він живе недовго.</li>
+        <li class="bad">Не кладіть туди кеш чи підключення до БД, бо ви створюватимете їх на кожен виклик.</li>
+      </ul>
+    </section>
+    <section class="slide "><h2>Scoped</h2>
+      <ul>
+        <li>Один «контекст» на одну справу: <code>DbContext</code>, поточний користувач, unit of work.</li>
+        <li>У ASP.NET Core контейнер відкриває scope на кожен HTTP-запит самостійно.</li>
+        <li>У консолі ви відкриваєте його так: <code>using var scope = host.Services.CreateScope();</code></li>
+        <li class="bad">Не резолвіть Scoped з кореня без scope, інакше отримаєте warning або виняток.</li>
+      </ul>
+    </section>
+    <section class="slide "><h2>Singleton</h2>
+      <ul>
+        <li>Спільне на весь процес: конфіг, кеш у пам’яті, фабрика <code>HttpClient</code>.</li>
+        <li>Створюється ліниво, при першому запиті (або одразу, якщо ви реєструєте готовий екземпляр).</li>
+        <li class="bad">Він має бути thread-safe, бо ним користуються всі потоки одразу.</li>
+        <li class="bad">Не захоплюйте Scoped чи Transient у конструктор Singleton — це captive dependency.</li>
+      </ul>
+    </section>
+    <section class="slide "><h2>Captive dependency</h2>
+      <p class="lead">Довгоживучий сервіс «бере в полон» короткоживучий. Ваш Scoped тоді житиме стільки ж, скільки й Singleton — тобто весь час роботи застосунку.</p>
+      <pre><code>services.AddScoped&lt;IOrderDb, OrderDb&gt;();
+services.AddSingleton&lt;OrderCache&gt;(); // ctor(IOrderDb db) — погано
+
+// OrderCache створиться раз і триматиме один OrderDb назавжди.
+// Другий HTTP-запит побачить чужі дані.</code></pre>
+      <p class="note">Правило: залежність живе не довше за свого власника. Singleton ← лише Singleton. Scoped ← Scoped або Singleton. Transient ← будь-що.</p>
+    </section>
+    <section class="slide "><h2>Де можна писати new</h2>
+      <ul>
+        <li>Писати в бізнес-класі <code>new LogManager()</code> чи <code>new EmailNotification()</code> — погана ідея. Так клас знову сам збирає свої залежності.</li>
+        <li>Усе зшивання графа об’єктів робимо в одному місці: у <code>Program</code> (або <code>Startup</code> для вебу). Це так званий composition root.</li>
+        <li>Саме там ви реєструєте сервіси в контейнері. А далі конструктор або <code>GetService</code> отримують уже готові об’єкти.</li>
+        <li>Використовувати <code>new</code> для дрібниць ніхто не забороняє: <code>List&lt;T&gt;</code>, рядки, <code>Guid.NewGuid()</code>, DTO. Ми говоримо про сервіси з поведінкою, а не про прості дані.</li>
+      </ul>
+    </section>
     <section class="slide next-step"><p class="kicker">Після лекції</p><h2>Що далі</h2>
       <p class="lead">У тій самій лабораторній з бібліотеки: зареєструйте сервіси в IoC-контейнері (lifetimes на місці).</p></section>
   </div>
