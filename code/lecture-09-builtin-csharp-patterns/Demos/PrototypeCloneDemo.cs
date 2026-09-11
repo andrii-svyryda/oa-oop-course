@@ -2,9 +2,13 @@ namespace Lecture09BuiltinCsharpPatterns.Demos;
 
 public static class PrototypeCloneDemo
 {
-    class Engine
+    class Engine : ICloneable
     {
         public int Power { get; set; }
+
+        public object Clone() => new Engine { Power = Power };
+
+        public Engine DeepClone() => new Engine { Power = Power };
     }
 
     class Car : ICloneable
@@ -20,13 +24,14 @@ public static class PrototypeCloneDemo
 
         public object Clone() => new Car(Width, Engine);
 
-        public Car DeepClone() => new(Width, new Engine { Power = Engine.Power });
+        public Car DeepClone() => new(Width, Engine.DeepClone());
     }
 
     public static void Run()
     {
         Console.WriteLine("--- Prototype / ICloneable ---");
         var one = new Car(1695, new Engine { Power = 100 });
+        one.MemberwiseClone();
         var shallow = (Car)one.Clone();
         shallow.Engine.Power = 200;
         Console.WriteLine($"  after shallow clone change: original engine={one.Engine.Power} (same object)");

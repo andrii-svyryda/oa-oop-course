@@ -118,6 +118,11 @@ pre {
   max-height: 58vh;
 }
 
+pre code.hljs {
+  background: transparent;
+  padding: 0;
+}
+
 code, kbd { font-family: "Cascadia Code", "Consolas", "Fira Code", monospace; }
 p code, li code { color: var(--accent-2); }
 

@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>10. Нові можливості C# — OOP on top of C#</title>
   <link rel="stylesheet" href="shared/deck.css">
+  <link rel="stylesheet" href="shared/hljs-theme.css">
 </head>
 <body>
   <div class="progress"></div>
@@ -38,28 +39,37 @@ var a = new Person(&quot;Ann&quot;, 20);
 var b = a with { Age = 21 }; // створюємо незмінну копію з новою властивістю
 Console.WriteLine(a == new Person(&quot;Ann&quot;, 20)); // True, бо дані однакові</code></pre></section>
     <section class="slide "><h2>Pattern matching поруч із поліморфізмом</h2>
-      <p class="lead">Конструкції pattern matching чудово підходять для розбору даних. Але завжди пам’ятайте: класична ієрархія типів лишається найкращим вибором для тієї поведінки, яку ви плануєте розширювати в майбутньому.</p>
+      <p class="lead">Pattern matching — чудовий інструмент для обробки даних. Проте пам'ятайте: якщо ви плануєте розширювати логіку в майбутньому, класична ієрархія класів залишається найкращим вибором.</p>
       <pre><code>string Label(IShape s) =&gt; s switch {
   Circle c =&gt; $&quot;circle r={c.Radius}&quot;,
   Square sq =&gt; $&quot;square {sq.Side}&quot;,
   _ =&gt; &quot;unknown&quot;
 };</code></pre></section>
-    <section class="slide "><h2>Default interface methods — уже вміємо</h2>
-      <p class="lead">Давайте згадаємо те, що ви вже застосовували у своїх лабораторних роботах.</p>
+    <section class="slide "><h2>Default interface methods</h2>
+      <p class="lead">Інтерфейси в C# можуть містити реалізацію методів за замовчуванням. Це розширює їхні можливості, дозволяючи додавати поведінку прямо в контракт.</p>
       <ul>
-        <li>На лекції 01 ми бачили, як можна описати спільний алгоритм безпосередньо в контракті інтерфейсу.</li>
-        <li>Сьогодні я лише нагадую вам про це: пам’ятайте, що це просто синтаксис, і він жодним чином не замінює патерн стратегії чи підхід DI.</li>
-        <li>А от що дійсно буде для вас новим сьогодні — це tuples, operators, records та patterns.</li>
+        <li><strong>Безпечне розширення API:</strong> додавання нових методів без поломки існуючих реалізацій.</li>
+        <li><strong>Спільна логіка:</strong> базовий алгоритм безпосередньо в інтерфейсі без дублювання.</li>
       </ul>
+      <p class="note"><strong>На відміну від абстрактних класів:</strong> інтерфейси не можуть містити полів (стану) та конструкторів, але один клас може реалізовувати одразу декілька інтерфейсів із дефолтними методами (множинне успадкування поведінки).</p>
+      <pre><code>public interface ILogger {
+  void Log(string message); // Звичайний метод
+
+  // Метод за замовчуванням (Default interface method)
+  void LogError(string error) =&gt; Log($&quot;[ERROR] {error}&quot;);
+}</code></pre>
     </section>
     <section class="slide next-step"><p class="kicker">Після лекції</p><h2>Що далі</h2>
       <p class="lead">Наша наступна лекція буде присвячена колекціям: ви навчитеся обирати структуру даних за типом доступу, а не просто використовувати <code>List</code> за звичкою.</p>
-      <p class="note">Зверніть увагу: доповідь про патерн поза курсом потрібна лише в тому випадку, якщо вона є у вашому індивідуальному плані (загальний №16). Це не є обов’язковим домашнім завданням для всієї групи.</p></section>
+    </section>
   </div>
   <div class="chrome">
     <span>OOP on top of C# · <b>Нові можливості C#</b></span>
     <span style="pointer-events:auto"><a href="index.html">усі лекції</a> · <span data-counter></span> · ← → · O огляд · F повний екран</span>
   </div>
+  <script src="shared/highlight.min.js"></script>
+  <script src="shared/csharp.min.js"></script>
+  <script src="shared/code-highlight.js"></script>
   <script src="shared/deck.js"></script>
 </body>
 </html>
